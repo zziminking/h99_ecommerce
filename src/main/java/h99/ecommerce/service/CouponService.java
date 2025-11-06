@@ -21,13 +21,14 @@ public class CouponService {
 
     /**
      * 쿠폰 발급 (선착순)
-     * 
+     * 동시성 제어를 위해 synchronized 적용
+     *
      * @param userId 사용자 ID
      * @param couponId 쿠폰 ID
      * @return 발급된 사용자 쿠폰
      * @throws IllegalStateException 중복 발급, 쿠폰 소진 등
      */
-    public UserCoupon issueCoupon(int userId, int couponId) {
+    public synchronized UserCoupon issueCoupon(int userId, int couponId) {
         // 1. 사용자 발급 내역 조회 (중복 발급 체크)
         Optional<UserCoupon> existingUserCoupon = userCouponRepository.findByUserIdAndCouponId(userId, couponId);
         if (existingUserCoupon.isPresent()) {
