@@ -4,8 +4,10 @@ erDiagram
     USER ||--o{ ORDER : places
     USER ||--o{ USER_COUPON : has
     USER ||--o{ POINT : makes
+    USER ||--o{ PRODUCT_VIEW : views
 
     PRODUCT ||--o{ CART_ITEM : "included in"
+    PRODUCT ||--o{ PRODUCT_VIEW : "viewed as"
 
     ORDER ||--o{ ORDER_ITEM : contains
     PRODUCT ||--o{ ORDER_ITEM : "ordered as"
@@ -18,6 +20,8 @@ erDiagram
         int user_id PK
         varchar username
         decimal point
+        datetime created_at
+        datetime updated_at
     }
 
     PRODUCT {
@@ -25,13 +29,18 @@ erDiagram
         varchar name
         decimal price
         int stock
+        int total_view_count
+        datetime created_at
+        datetime updated_at
     }
-
+    
     CART_ITEM {
         int cart_item_id PK
         int user_id FK
         int product_id FK
         int quantity
+        datetime created_at
+        datetime updated_at
     }
 
     ORDER {
@@ -40,6 +49,8 @@ erDiagram
         int total_quantity
         int total_price
         datetime order_at
+        datetime created_at
+        datetime updated_at
     }
 
     ORDER_ITEM {
@@ -52,6 +63,8 @@ erDiagram
         decimal discount_amount
         decimal final_amount
         decimal price
+        datetime created_at
+        datetime updated_at
     }
 
     COUPON {
@@ -64,6 +77,8 @@ erDiagram
         datetime start_at
         datetime end_at
         varchar status "ACTIVE, INACTIVE"
+        datetime created_at
+        datetime updated_at
     }
 
     USER_COUPON {
@@ -72,6 +87,7 @@ erDiagram
         int coupon_id FK
         boolean is_used
         datetime used_at
+        datetime created_at
     }
 
     POINT {
@@ -79,5 +95,6 @@ erDiagram
         int order_id FK
         int user_id FK
         decimal amount
+        datetime created_at
     }
 ```
