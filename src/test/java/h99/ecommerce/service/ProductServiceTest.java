@@ -4,12 +4,16 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import h99.ecommerce.domain.Product;
+import h99.ecommerce.domain.ProductStatistics;
 import h99.ecommerce.domain.vo.Stock;
 import h99.ecommerce.exception.NotEnoughStockException;
 import h99.ecommerce.repository.ProductRepository;
+import h99.ecommerce.repository.ProductStatisticsRepository;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -23,6 +27,9 @@ public class ProductServiceTest {
 
     @Mock
     private ProductRepository productRepository;
+
+    @Mock
+    private ProductStatisticsRepository productStatisticsRepository;
 
     @InjectMocks
     private ProductService productService;
@@ -41,6 +48,9 @@ public class ProductServiceTest {
     void get_product_success() {
         // given
         when(productRepository.findOne(1)).thenReturn(testProduct);
+        when(productStatisticsRepository.findByProductIdAndDate(anyInt(), any(LocalDate.class)))
+                .thenReturn(Optional.empty());
+        when(productStatisticsRepository.generateId()).thenReturn(1);
 
         // when
         Product result = productService.getProduct(1);
@@ -50,6 +60,7 @@ public class ProductServiceTest {
         assertEquals(1, result.getProductId());
         assertEquals(1, result.getTotalViewCount()); // 조회수 증가 확인
         verify(productRepository).save(testProduct);
+        verify(productStatisticsRepository).save(any(ProductStatistics.class));
     }
 
     @Test

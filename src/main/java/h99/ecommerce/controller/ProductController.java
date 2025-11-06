@@ -75,4 +75,34 @@ public class ProductController {
         boolean enough = productService.checkStockEnough(productId, quantity);
         return ResponseEntity.ok(enough);
     }
+
+    /**
+     * 인기 상품 조회 (최근 3일간 조회수 기준)
+     */
+    @GetMapping("/popular/views")
+    public ResponseEntity<List<Product>> getPopularProductsByViewCount(
+            @RequestParam(defaultValue = "5") Integer limit
+    ) {
+        if (limit == null || limit <= 0) {
+            limit = 5;
+        }
+
+        List<Product> popularProducts = productService.getPopularProductsByViewCount(limit);
+        return ResponseEntity.ok(popularProducts);
+    }
+
+    /**
+     * 인기 상품 조회 (최근 3일간 주문 수량 기준)
+     */
+    @GetMapping("/popular/orders")
+    public ResponseEntity<List<Product>> getPopularProductsByOrderCount(
+            @RequestParam(defaultValue = "5") Integer limit
+    ) {
+        if (limit == null || limit <= 0) {
+            limit = 5;
+        }
+
+        List<Product> popularProducts = productService.getPopularProductsByOrderCount(limit);
+        return ResponseEntity.ok(popularProducts);
+    }
 }

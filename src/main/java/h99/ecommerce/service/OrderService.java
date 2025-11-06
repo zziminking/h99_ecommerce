@@ -57,6 +57,9 @@ public class OrderService {
                 // 주문 아이템 생성
                 OrderItem orderItem = createOrderItem(order.getOrderId(), cartItem, product);
                 order.addOrderItem(orderItem);
+
+                // 주문 수량 통계 업데이트
+                productService.updateOrderStatistics(cartItem.getProductId(), cartItem.getQuantity());
             }
 
             // 4. 주문 총액 및 총 수량 계산
