@@ -1,9 +1,11 @@
 package h99.ecommerce.service;
 
 import h99.ecommerce.domain.Coupon;
+import h99.ecommerce.domain.User;
 import h99.ecommerce.domain.UserCoupon;
 import h99.ecommerce.repository.CouponRepository;
 import h99.ecommerce.repository.UserCouponRepository;
+import h99.ecommerce.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -18,6 +20,7 @@ public class CouponService {
 
     private final CouponRepository couponRepository;
     private final UserCouponRepository userCouponRepository;
+    private final UserRepository userRepository;
 
     /**
      * 쿠폰 발급 (선착순)
@@ -28,7 +31,7 @@ public class CouponService {
      * @return 발급된 사용자 쿠폰
      * @throws IllegalStateException 중복 발급, 쿠폰 소진 등
      */
-    public synchronized UserCoupon issueCoupon(int userId, int couponId) {
+    public synchronized UserCoupon issueCoupon(Long userId, Long couponId) {
         // 1. 사용자 발급 내역 조회 (중복 발급 체크)
         Optional<UserCoupon> existingUserCoupon = userCouponRepository.findByUserIdAndCouponId(userId, couponId);
         if (existingUserCoupon.isPresent()) {
@@ -51,19 +54,17 @@ public class CouponService {
         couponRepository.save(coupon);
 
         // 5. 사용자 쿠폰 발급
-        int userCouponId = userCouponRepository.generateId();
+        User user = userRepository.findOne(userId);
         UserCoupon userCoupon = UserCoupon.builder()
-                .userCouponId(userCouponId)
-                .userId(userId)
-                .couponId(couponId)
+                .user(user)
+                .coupon(coupon)
                 .isUsed(false)
                 .usedAt(null)
                 .build();
 
         userCouponRepository.save(userCoupon);
 
-        log.info("쿠폰 발급 완료 - userId: {}, couponId: {}, userCouponId: {}", 
-                userId, couponId, userCouponId);
+        log.info("쿠폰 발급 완료 - userId: {}, couponId: {}", userId, couponId);
 
         return userCoupon;
     }
@@ -71,20 +72,20 @@ public class CouponService {
     /**
      * 사용자 쿠폰 목록 조회
      */
-    public List<UserCoupon> getUserCoupons(int userId) {
+    public List<UserCoupon> getUserCoupons(Long userId) {
         return userCouponRepository.findByUserId(userId);
     }
 
     /**
      * 사용 가능한 쿠폰 목록 조회 (미사용 + 유효 기간 내)
      */
-    public List<UserCoupon> getAvailableUserCoupons(int userId) {
+    public List<UserCoupon> getAvailableUserCoupons(Long userId) {
         List<UserCoupon> userCoupons = userCouponRepository.findByUserId(userId);
         
         return userCoupons.stream()
                 .filter(UserCoupon::canUse)
-                .filter(uc -> {
-                    Coupon coupon = couponRepository.findOne(uc.getCouponId());
+                .filter(it -> {
+                    Coupon coupon = couponRepository.findOne(it.getCouponId());
                     return coupon != null && coupon.isValidPeriod() && coupon.isActive();
                 })
                 .toList();
@@ -93,7 +94,7 @@ public class CouponService {
     /**
      * 쿠폰 상세 조회
      */
-    public Coupon getCoupon(int couponId) {
+    public Coupon getCoupon(Long couponId) {
         Coupon coupon = couponRepository.findOne(couponId);
         if (coupon == null) {
             throw new IllegalArgumentException("쿠폰을 찾을 수 없습니다. couponId: " + couponId);
@@ -113,7 +114,7 @@ public class CouponService {
     /**
      * 쿠폰 활성화
      */
-    public void activateCoupon(int couponId) {
+    public void activateCoupon(Long couponId) {
         Coupon coupon = couponRepository.findOne(couponId);
         if (coupon == null) {
             throw new IllegalArgumentException("쿠폰을 찾을 수 없습니다. couponId: " + couponId);
@@ -128,7 +129,7 @@ public class CouponService {
     /**
      * 쿠폰 비활성화
      */
-    public void deactivateCoupon(int couponId) {
+    public void deactivateCoupon(Long couponId) {
         Coupon coupon = couponRepository.findOne(couponId);
         if (coupon == null) {
             throw new IllegalArgumentException("쿠폰을 찾을 수 없습니다. couponId: " + couponId);
@@ -143,7 +144,7 @@ public class CouponService {
     /**
      * 사용자 쿠폰 검증 (결제 시 사용)
      */
-    public void validateUserCoupon(int userId, int userCouponId) {
+    public void validateUserCoupon(Long userId, Long userCouponId) {
         UserCoupon userCoupon = userCouponRepository.findOne(userCouponId);
         if (userCoupon == null) {
             throw new IllegalArgumentException("사용자 쿠폰을 찾을 수 없습니다.");

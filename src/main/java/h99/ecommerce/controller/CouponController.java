@@ -30,7 +30,7 @@ public class CouponController {
      * 쿠폰 상세 조회
      */
     @GetMapping("/{couponId}")
-    public ResponseEntity<Coupon> getCoupon(@PathVariable Integer couponId) {
+    public ResponseEntity<Coupon> getCoupon(@PathVariable Long couponId) {
         if (couponId == null || couponId <= 0) {
             return ResponseEntity.badRequest().build();
         }
@@ -44,8 +44,8 @@ public class CouponController {
      */
     @PostMapping("/{couponId}/issue")
     public ResponseEntity<UserCoupon> issueCoupon(
-            @PathVariable Integer couponId,
-            @RequestParam Integer userId
+            @PathVariable Long couponId,
+            @RequestParam Long userId
     ) {
         if (couponId == null || couponId <= 0) {
             return ResponseEntity.badRequest().build();
@@ -62,7 +62,7 @@ public class CouponController {
      * 사용자 쿠폰 목록 조회
      */
     @GetMapping("/users/{userId}")
-    public ResponseEntity<List<UserCoupon>> getUserCoupons(@PathVariable Integer userId) {
+    public ResponseEntity<List<UserCoupon>> getUserCoupons(@PathVariable Long userId) {
         if (userId == null || userId <= 0) {
             return ResponseEntity.badRequest().build();
         }
@@ -75,7 +75,7 @@ public class CouponController {
      * 사용 가능한 쿠폰 목록 조회
      */
     @GetMapping("/users/{userId}/available")
-    public ResponseEntity<List<UserCoupon>> getAvailableUserCoupons(@PathVariable Integer userId) {
+    public ResponseEntity<List<UserCoupon>> getAvailableUserCoupons(@PathVariable Long userId) {
         if (userId == null || userId <= 0) {
             return ResponseEntity.badRequest().build();
         }

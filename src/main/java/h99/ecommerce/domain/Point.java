@@ -1,28 +1,51 @@
 package h99.ecommerce.domain;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.Builder;
 import lombok.Getter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+@Entity
+@Table(name = "point")
 @Getter
 @Builder
 public class Point {
 
-    private int pointId;
-    private int orderId;
-    private int userId;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "point_id")
+    private Long pointId;
+
+    @Column(name = "order_id")
+    private Long orderId;
+
+    @Column(name = "user_id")
+    private Long userId;
+
+    @Column(name = "amount")
     private BigDecimal amount;
+
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    public Point(int pointId, int orderId, int userId, BigDecimal amount, LocalDateTime createdAt) {
+    public Point(Long pointId, Long orderId, Long userId, BigDecimal amount, LocalDateTime createdAt) {
         validateAmount(amount);
         this.pointId = pointId;
         this.orderId = orderId;
         this.userId = userId;
         this.amount = amount;
         this.createdAt = createdAt == null ? LocalDateTime.now() : createdAt;
+    }
+
+    public Point() {
+
     }
 
     private void validateAmount(BigDecimal amount) {

@@ -1,28 +1,59 @@
 package h99.ecommerce.domain;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.Builder;
 import lombok.Getter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+@Entity
+@Table(name = "coupons")
 @Getter
 @Builder
 public class Coupon {
 
-    private int couponId;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "coupon_id")
+    private Long couponId;
+
+    @Column(name = "name")
     private String name;
+
+    @Column(name = "discount_type")
     private DiscountType discountType;
+
+    @Column(name = "discount_value")
     private BigDecimal discountValue;
+
+    @Column(name = "max_issue_count", nullable = false)
     private int maxIssueCount;
+
+    @Column(name = "issued_count", nullable = false)
     private int issuedCount;
+
+    @Column(name = "start_at")
     private LocalDateTime startAt;
+
+    @Column(name = "end_at")
     private LocalDateTime endAt;
+
+    @Column(name = "status")
     private CouponStatus status;
+
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
+
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    public Coupon(int couponId, String name, DiscountType discountType, BigDecimal discountValue,
+    public Coupon(Long couponId, String name, DiscountType discountType, BigDecimal discountValue,
                   int maxIssueCount, int issuedCount, LocalDateTime startAt, LocalDateTime endAt,
                   CouponStatus status, LocalDateTime createdAt, LocalDateTime updatedAt) {
         validateDiscountValue(discountValue, discountType);
@@ -40,6 +71,10 @@ public class Coupon {
         this.status = status == null ? CouponStatus.ACTIVE : status;
         this.createdAt = createdAt == null ? LocalDateTime.now() : createdAt;
         this.updatedAt = updatedAt == null ? LocalDateTime.now() : updatedAt;
+    }
+
+    public Coupon() {
+
     }
 
     private void validateDiscountValue(BigDecimal discountValue, DiscountType discountType) {

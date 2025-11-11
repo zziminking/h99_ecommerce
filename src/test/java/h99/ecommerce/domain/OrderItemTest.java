@@ -11,11 +11,13 @@ import static org.junit.jupiter.api.Assertions.*;
 public class OrderItemTest {
 
     private OrderItem orderItem;
+    private Order order;
+    private Product product;
 
     @BeforeEach
     void setUp() {
         orderItem = new OrderItem(
-                1, 100, 1, 5, OrderStatus.PENDING,
+                1L, order, product, 5, OrderStatus.PENDING,
                 new BigDecimal("50000"), BigDecimal.ZERO, new BigDecimal("50000"),
                 new BigDecimal("10000"), null, null
         );
@@ -26,15 +28,15 @@ public class OrderItemTest {
     void create_order_item_success() {
         // given & when
         OrderItem item = new OrderItem(
-                2, 100, 2, 3, OrderStatus.PENDING,
+                2L, order, product, 3, OrderStatus.PENDING,
                 null, null, null,
                 new BigDecimal("5000"), null, null
         );
 
         // then
         assertEquals(2, item.getOrderItemId());
-        assertEquals(100, item.getOrderId());
-        assertEquals(2, item.getProductId());
+        assertEquals(100, item.getOrder());
+        assertEquals(2, item.getProduct());
         assertEquals(3, item.getQuantity());
         assertEquals(OrderStatus.PENDING, item.getStatus());
         assertEquals(BigDecimal.ZERO, item.getTotalAmount());
@@ -50,7 +52,7 @@ public class OrderItemTest {
     void create_order_item_with_zero_quantity_fail() {
         // when & then
         assertThrows(IllegalArgumentException.class, () ->
-                new OrderItem(2, 100, 2, 0, OrderStatus.PENDING,
+                new OrderItem(2L, order, product, 0, OrderStatus.PENDING,
                         null, null, null, new BigDecimal("5000"), null, null)
         );
     }
@@ -60,7 +62,7 @@ public class OrderItemTest {
     void create_order_item_with_negative_quantity_fail() {
         // when & then
         assertThrows(IllegalArgumentException.class, () ->
-                new OrderItem(2, 100, 2, -1, OrderStatus.PENDING,
+                new OrderItem(2L, order, product, -1, OrderStatus.PENDING,
                         null, null, null, new BigDecimal("5000"), null, null)
         );
     }
@@ -70,7 +72,7 @@ public class OrderItemTest {
     void create_order_item_with_null_price_fail() {
         // when & then
         assertThrows(IllegalArgumentException.class, () ->
-                new OrderItem(2, 100, 2, 3, OrderStatus.PENDING,
+                new OrderItem(2L, order, product, 3, OrderStatus.PENDING,
                         null, null, null, null, null, null)
         );
     }
@@ -80,7 +82,7 @@ public class OrderItemTest {
     void create_order_item_with_negative_price_fail() {
         // when & then
         assertThrows(IllegalArgumentException.class, () ->
-                new OrderItem(2, 100, 2, 3, OrderStatus.PENDING,
+                new OrderItem(2L, order, product, 3, OrderStatus.PENDING,
                         null, null, null, new BigDecimal("-1000"), null, null)
         );
     }
@@ -90,7 +92,7 @@ public class OrderItemTest {
     void calculate_total_amount_success() {
         // given
         OrderItem item = new OrderItem(
-                2, 100, 2, 3, OrderStatus.PENDING,
+                2L, order, product, 3, OrderStatus.PENDING,
                 null, null, null,
                 new BigDecimal("5000"), null, null
         );
@@ -117,7 +119,7 @@ public class OrderItemTest {
     void calculate_final_amount_with_discount() {
         // given
         OrderItem item = new OrderItem(
-                2, 100, 2, 3, OrderStatus.PENDING,
+                2L, order, product, 3, OrderStatus.PENDING,
                 new BigDecimal("15000"), new BigDecimal("3000"), null,
                 new BigDecimal("5000"), null, null
         );
@@ -134,7 +136,7 @@ public class OrderItemTest {
     void calculate_final_amount_discount_greater_than_total() {
         // given
         OrderItem item = new OrderItem(
-                2, 100, 2, 3, OrderStatus.PENDING,
+                2L, order, product, 3, OrderStatus.PENDING,
                 new BigDecimal("15000"), new BigDecimal("20000"), null,
                 new BigDecimal("5000"), null, null
         );

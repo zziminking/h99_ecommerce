@@ -4,9 +4,11 @@ import h99.ecommerce.dto.CartItemDto;
 import h99.ecommerce.request.CartAddRequest;
 import h99.ecommerce.request.CartUpdateRequest;
 import h99.ecommerce.service.CartItemService;
+import jakarta.validation.Valid;
 import java.math.BigDecimal;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/cart")
@@ -30,7 +33,7 @@ public class CartItemController {
      */
     @GetMapping("/{userId}")
     public ResponseEntity<List<CartItemDto>> getCart(
-            @PathVariable Integer userId
+            @PathVariable Long userId
     ) {
         if (userId == null || userId <= 0) {
             return ResponseEntity.badRequest().build();
@@ -45,7 +48,7 @@ public class CartItemController {
      */
     @GetMapping("/{userId}/total")
     public ResponseEntity<BigDecimal> getCartTotal(
-            @PathVariable Integer userId
+            @PathVariable Long userId
     ) {
         if (userId == null || userId <= 0) {
             return ResponseEntity.badRequest().build();
@@ -70,7 +73,12 @@ public class CartItemController {
             return ResponseEntity.badRequest().build();
         }
 
-        cartItemService.addCartItem(request);
+        try {
+            cartItemService.addCartItem(request);
+        } catch (Exception e) {
+            log.error("장바구니 추가 중 에러", e);
+            return ResponseEntity.badRequest().build();
+        }
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
@@ -79,15 +87,15 @@ public class CartItemController {
      */
     @PatchMapping("/{cartItemId}")
     public ResponseEntity<Void> updateCartItemQuantity(
-            @PathVariable Integer cartItemId,
-            @RequestBody CartUpdateRequest request
+            @PathVariable Long cartItemId,
+            @Valid @RequestBody CartUpdateRequest request
     ) {
         if (cartItemId == null || cartItemId <= 0) {
             return ResponseEntity.badRequest().build();
         }
-        if (request.getQuantity() == null || request.getQuantity() <= 0) {
-            return ResponseEntity.badRequest().build();
-        }
+//        if (request.getQuantity() == null || request.getQuantity() <= 0) {
+//            return ResponseEntity.badRequest().build();
+//        }
 
         cartItemService.updateCartItemQuantity(cartItemId, request.getQuantity());
         return ResponseEntity.ok().build();
@@ -98,7 +106,7 @@ public class CartItemController {
      */
     @DeleteMapping("/{cartItemId}")
     public ResponseEntity<Void> removeFromCart(
-            @PathVariable Integer cartItemId
+            @PathVariable Long cartItemId
     ) {
         if (cartItemId == null || cartItemId <= 0) {
             return ResponseEntity.badRequest().build();

@@ -2,6 +2,7 @@ package h99.ecommerce.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import h99.ecommerce.domain.Order;
+import h99.ecommerce.domain.User;
 import h99.ecommerce.service.OrderService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -15,7 +16,7 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.BDDMockito.given;
@@ -39,15 +40,15 @@ class OrderControllerTest {
     void createOrder_Success_WithoutCoupon() throws Exception {
         // given
         Order order = Order.builder()
-                .orderId(1)
-                .userId(1)
+                .orderId(1L)
+                .user(User.builder().userId(1L).build())
                 .totalQuantity(2)
                 .totalPrice(new BigDecimal("10000"))
                 .orderAt(LocalDateTime.now())
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();
-        given(orderService.createOrder(eq(1), isNull())).willReturn(order);
+        given(orderService.createOrder(eq(1L), isNull())).willReturn(order);
 
         // when & then
         mockMvc.perform(post("/api/orders")
@@ -63,15 +64,15 @@ class OrderControllerTest {
     void createOrder_Success_WithCoupon() throws Exception {
         // given
         Order order = Order.builder()
-                .orderId(1)
-                .userId(1)
+                .orderId(1L)
+                .user(User.builder().userId(1L).build())
                 .totalQuantity(2)
                 .totalPrice(new BigDecimal("9000"))
                 .orderAt(LocalDateTime.now())
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();
-        given(orderService.createOrder(1, 10)).willReturn(order);
+        given(orderService.createOrder(1L, 10L)).willReturn(order);
 
         // when & then
         mockMvc.perform(post("/api/orders")
@@ -116,15 +117,15 @@ class OrderControllerTest {
     void getOrder_Success() throws Exception {
         // given
         Order order = Order.builder()
-                .orderId(1)
-                .userId(1)
+                .orderId(1L)
+                .user(User.builder().userId(1L).build())
                 .totalQuantity(2)
                 .totalPrice(new BigDecimal("10000"))
                 .orderAt(LocalDateTime.now())
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();
-        given(orderService.getOrder(1)).willReturn(order);
+        given(orderService.getOrder(1L)).willReturn(order);
 
         // when & then
         mockMvc.perform(get("/api/orders/1"))
@@ -151,8 +152,8 @@ class OrderControllerTest {
         // given
         List<Order> orders = Arrays.asList(
                 Order.builder()
-                        .orderId(1)
-                        .userId(1)
+                        .orderId(1L)
+                        .user(User.builder().userId(1L).build())
                         .totalQuantity(2)
                         .totalPrice(new BigDecimal("10000"))
                         .orderAt(LocalDateTime.now())
@@ -160,8 +161,8 @@ class OrderControllerTest {
                         .updatedAt(LocalDateTime.now())
                         .build(),
                 Order.builder()
-                        .orderId(2)
-                        .userId(1)
+                        .orderId(2L)
+                        .user(User.builder().userId(1L).build())
                         .totalQuantity(3)
                         .totalPrice(new BigDecimal("20000"))
                         .orderAt(LocalDateTime.now())
@@ -169,7 +170,7 @@ class OrderControllerTest {
                         .updatedAt(LocalDateTime.now())
                         .build()
         );
-        given(orderService.getOrdersByUserId(1)).willReturn(orders);
+        given(orderService.getOrdersByUserId(1L)).willReturn(orders);
 
         // when & then
         mockMvc.perform(get("/api/orders/users/1"))

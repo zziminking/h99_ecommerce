@@ -31,7 +31,7 @@ public class PaymentService {
      * @param userCouponId 사용할 쿠폰 ID (nullable)
      * @throws IllegalStateException 포인트 부족, 쿠폰 만료 등
      */
-    public void processPayment(int userId, int orderId, BigDecimal orderAmount, Integer userCouponId) {
+    public void processPayment(Long userId, Long orderId, BigDecimal orderAmount, Long userCouponId) {
         // 1. 사용자 조회
         User user = userRepository.findOne(userId);
         if (user == null) {
@@ -50,7 +50,7 @@ public class PaymentService {
             }
 
             // 쿠폰 소유자 확인
-            if (userCoupon.getUserId() != userId) {
+            if (!userId.equals(userCoupon.getUserId())) {
                 throw new IllegalArgumentException("해당 쿠폰을 사용할 권한이 없습니다.");
             }
 
@@ -96,9 +96,7 @@ public class PaymentService {
         userRepository.save(user);
 
         // 5. 포인트 사용 내역 저장 (음수로 저장)
-        int pointId = pointRepository.generateId();
         Point point = Point.builder()
-                .pointId(pointId)
                 .orderId(orderId)
                 .userId(userId)
                 .amount(finalAmount.negate()) // 사용은 음수로 저장
@@ -115,7 +113,7 @@ public class PaymentService {
     /**
      * 포인트 충전
      */
-    public void chargePoint(int userId, BigDecimal amount) {
+    public void chargePoint(Long userId, BigDecimal amount) {
         if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("충전 금액은 0보다 커야 합니다.");
         }
@@ -130,10 +128,8 @@ public class PaymentService {
         userRepository.save(user);
 
         // 포인트 충전 내역 저장 (양수로 저장)
-        int pointId = pointRepository.generateId();
         Point point = Point.builder()
-                .pointId(pointId)
-                .orderId(0) // 충전은 주문 ID 없음
+                .orderId(0L) // 충전은 주문 ID 없음
                 .userId(userId)
                 .amount(amount)
                 .build();
@@ -143,7 +139,7 @@ public class PaymentService {
     /**
      * 포인트 잔액 조회
      */
-    public BigDecimal getPointBalance(int userId) {
+    public BigDecimal getPointBalance(Long userId) {
         User user = userRepository.findOne(userId);
         if (user == null) {
             throw new IllegalArgumentException("사용자를 찾을 수 없습니다. userId: " + userId);

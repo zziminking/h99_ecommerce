@@ -18,7 +18,7 @@ public class CouponTest {
     void setUp() {
         now = LocalDateTime.now();
         coupon = new Coupon(
-                1, "10% 할인 쿠폰",
+                1L, "10% 할인 쿠폰",
                 DiscountType.PERCENTAGE, new BigDecimal("10"),
                 100, 50,
                 now.minusDays(1), now.plusDays(30),
@@ -31,7 +31,7 @@ public class CouponTest {
     void create_coupon_success() {
         // given & when
         Coupon newCoupon = new Coupon(
-                2, "5000원 할인",
+                2L, "5000원 할인",
                 DiscountType.FIXED, new BigDecimal("5000"),
                 50, 0,
                 now, now.plusDays(30),
@@ -55,7 +55,7 @@ public class CouponTest {
     void create_coupon_with_zero_discount_fail() {
         // when & then
         assertThrows(IllegalArgumentException.class, () ->
-                new Coupon(2, "잘못된 쿠폰", DiscountType.FIXED, BigDecimal.ZERO,
+                new Coupon(2L, "잘못된 쿠폰", DiscountType.FIXED, BigDecimal.ZERO,
                         50, 0, now, now.plusDays(30), CouponStatus.ACTIVE, null, null)
         );
     }
@@ -65,7 +65,7 @@ public class CouponTest {
     void create_coupon_with_percentage_over_100_fail() {
         // when & then
         assertThrows(IllegalArgumentException.class, () ->
-                new Coupon(2, "잘못된 쿠폰", DiscountType.PERCENTAGE, new BigDecimal("101"),
+                new Coupon(2L, "잘못된 쿠폰", DiscountType.PERCENTAGE, new BigDecimal("101"),
                         50, 0, now, now.plusDays(30), CouponStatus.ACTIVE, null, null)
         );
     }
@@ -75,7 +75,7 @@ public class CouponTest {
     void create_coupon_with_zero_max_issue_fail() {
         // when & then
         assertThrows(IllegalArgumentException.class, () ->
-                new Coupon(2, "잘못된 쿠폰", DiscountType.FIXED, new BigDecimal("5000"),
+                new Coupon(2L, "잘못된 쿠폰", DiscountType.FIXED, new BigDecimal("5000"),
                         0, 0, now, now.plusDays(30), CouponStatus.ACTIVE, null, null)
         );
     }
@@ -85,7 +85,7 @@ public class CouponTest {
     void create_coupon_with_invalid_period_fail() {
         // when & then
         assertThrows(IllegalArgumentException.class, () ->
-                new Coupon(2, "잘못된 쿠폰", DiscountType.FIXED, new BigDecimal("5000"),
+                new Coupon(2L, "잘못된 쿠폰", DiscountType.FIXED, new BigDecimal("5000"),
                         50, 0, now.plusDays(30), now, CouponStatus.ACTIVE, null, null)
         );
     }
@@ -118,7 +118,7 @@ public class CouponTest {
     void can_issue_max_count_reached() {
         // given
         Coupon fullCoupon = new Coupon(
-                2, "소진된 쿠폰",
+                2L, "소진된 쿠폰",
                 DiscountType.FIXED, new BigDecimal("5000"),
                 10, 10,
                 now.minusDays(1), now.plusDays(30),
@@ -137,7 +137,7 @@ public class CouponTest {
     void can_issue_before_start_date() {
         // given
         Coupon futureCoupon = new Coupon(
-                2, "미래 쿠폰",
+                2L, "미래 쿠폰",
                 DiscountType.FIXED, new BigDecimal("5000"),
                 50, 0,
                 now.plusDays(10), now.plusDays(30),
@@ -156,7 +156,7 @@ public class CouponTest {
     void can_issue_after_end_date() {
         // given
         Coupon expiredCoupon = new Coupon(
-                2, "만료된 쿠폰",
+                2L, "만료된 쿠폰",
                 DiscountType.FIXED, new BigDecimal("5000"),
                 50, 0,
                 now.minusDays(30), now.minusDays(1),
@@ -188,7 +188,7 @@ public class CouponTest {
     void issue_coupon_max_count_fail() {
         // given
         Coupon fullCoupon = new Coupon(
-                2, "소진 임박 쿠폰",
+                2L, "소진 임박 쿠폰",
                 DiscountType.FIXED, new BigDecimal("5000"),
                 10, 10,
                 now.minusDays(1), now.plusDays(30),
@@ -241,7 +241,7 @@ public class CouponTest {
     void calculate_discount_amount_fixed() {
         // given
         Coupon fixedCoupon = new Coupon(
-                2, "5000원 할인",
+                2L, "5000원 할인",
                 DiscountType.FIXED, new BigDecimal("5000"),
                 50, 0,
                 now, now.plusDays(30),
@@ -261,7 +261,7 @@ public class CouponTest {
     void calculate_discount_amount_fixed_greater_than_order() {
         // given
         Coupon fixedCoupon = new Coupon(
-                2, "5000원 할인",
+                2L, "5000원 할인",
                 DiscountType.FIXED, new BigDecimal("5000"),
                 50, 0,
                 now, now.plusDays(30),
@@ -313,7 +313,7 @@ public class CouponTest {
     void is_valid_period_false() {
         // given
         Coupon expiredCoupon = new Coupon(
-                2, "만료된 쿠폰",
+                2L, "만료된 쿠폰",
                 DiscountType.FIXED, new BigDecimal("5000"),
                 50, 0,
                 now.minusDays(30), now.minusDays(1),

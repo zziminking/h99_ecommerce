@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import h99.ecommerce.domain.Coupon;
 import h99.ecommerce.domain.CouponStatus;
 import h99.ecommerce.domain.DiscountType;
+import h99.ecommerce.domain.User;
 import h99.ecommerce.domain.UserCoupon;
 import h99.ecommerce.service.CouponService;
 import org.junit.jupiter.api.DisplayName;
@@ -18,7 +19,6 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -42,7 +42,7 @@ class CouponControllerTest {
         // given
         List<Coupon> coupons = Arrays.asList(
                 Coupon.builder()
-                        .couponId(1)
+                        .couponId(1L)
                         .name("10% 할인 쿠폰")
                         .discountType(DiscountType.PERCENTAGE)
                         .discountValue(new BigDecimal("10"))
@@ -55,7 +55,7 @@ class CouponControllerTest {
                         .updatedAt(LocalDateTime.now())
                         .build(),
                 Coupon.builder()
-                        .couponId(2)
+                        .couponId(2L)
                         .name("5000원 할인 쿠폰")
                         .discountType(DiscountType.FIXED)
                         .discountValue(new BigDecimal("5000"))
@@ -88,7 +88,7 @@ class CouponControllerTest {
     void getCoupon_Success() throws Exception {
         // given
         Coupon coupon = Coupon.builder()
-                .couponId(1)
+                .couponId(1L)
                 .name("10% 할인 쿠폰")
                 .discountType(DiscountType.PERCENTAGE)
                 .discountValue(new BigDecimal("10"))
@@ -100,7 +100,7 @@ class CouponControllerTest {
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();
-        given(couponService.getCoupon(1)).willReturn(coupon);
+        given(couponService.getCoupon(1L)).willReturn(coupon);
 
         // when & then
         mockMvc.perform(get("/api/coupons/1"))
@@ -128,13 +128,13 @@ class CouponControllerTest {
     void issueCoupon_Success() throws Exception {
         // given
         UserCoupon userCoupon = UserCoupon.builder()
-                .userCouponId(1)
-                .userId(1)
-                .couponId(1)
+                .userCouponId(1L)
+                .user(User.builder().build())
+                .coupon(Coupon.builder().build())
                 .isUsed(false)
                 .createdAt(LocalDateTime.now())
                 .build();
-        given(couponService.issueCoupon(1, 1)).willReturn(userCoupon);
+        given(couponService.issueCoupon(1L, 1L)).willReturn(userCoupon);
 
         // when & then
         mockMvc.perform(post("/api/coupons/1/issue")
@@ -145,7 +145,7 @@ class CouponControllerTest {
                 .andExpect(jsonPath("$.couponId").value(1))
                 .andExpect(jsonPath("$.used").value(false));
 
-        verify(couponService).issueCoupon(1, 1);
+        verify(couponService).issueCoupon(1L, 1L);
     }
 
     @Test
@@ -176,22 +176,22 @@ class CouponControllerTest {
         // given
         List<UserCoupon> userCoupons = Arrays.asList(
                 UserCoupon.builder()
-                        .userCouponId(1)
-                        .userId(1)
-                        .couponId(1)
+                        .userCouponId(1L)
+                        .user(User.builder().userId(1L).build())
+                        .coupon(Coupon.builder().couponId(1L).build())
                         .isUsed(false)
                         .createdAt(LocalDateTime.now())
                         .build(),
                 UserCoupon.builder()
-                        .userCouponId(2)
-                        .userId(1)
-                        .couponId(2)
+                        .userCouponId(2L)
+                        .user(User.builder().userId(1L).build())
+                        .coupon(Coupon.builder().couponId(2L).build())
                         .isUsed(true)
                         .usedAt(LocalDateTime.now().minusDays(3))
                         .createdAt(LocalDateTime.now().minusDays(5))
                         .build()
         );
-        given(couponService.getUserCoupons(1)).willReturn(userCoupons);
+        given(couponService.getUserCoupons(1L)).willReturn(userCoupons);
 
         // when & then
         mockMvc.perform(get("/api/coupons/users/1"))
@@ -220,21 +220,21 @@ class CouponControllerTest {
         // given
         List<UserCoupon> availableCoupons = Arrays.asList(
                 UserCoupon.builder()
-                        .userCouponId(1)
-                        .userId(1)
-                        .couponId(1)
+                        .userCouponId(1L)
+                        .user(User.builder().userId(1L).build())
+                        .coupon(Coupon.builder().couponId(1L).build())
                         .isUsed(false)
                         .createdAt(LocalDateTime.now())
                         .build(),
                 UserCoupon.builder()
-                        .userCouponId(3)
-                        .userId(1)
-                        .couponId(3)
+                        .userCouponId(3L)
+                        .user(User.builder().userId(1L).build())
+                        .coupon(Coupon.builder().couponId(3L).build())
                         .isUsed(false)
                         .createdAt(LocalDateTime.now().minusDays(1))
                         .build()
         );
-        given(couponService.getAvailableUserCoupons(1)).willReturn(availableCoupons);
+        given(couponService.getAvailableUserCoupons(1L)).willReturn(availableCoupons);
 
         // when & then
         mockMvc.perform(get("/api/coupons/users/1/available"))

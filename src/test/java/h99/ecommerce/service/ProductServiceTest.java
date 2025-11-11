@@ -39,21 +39,20 @@ public class ProductServiceTest {
 
     @BeforeEach
     void setUp() {
-        testProduct = new Product(1, "테스트 상품", "설명", new BigDecimal("10000"), new Stock(100), 0, null, null);
-        stockEmptyProduct = new Product(2, "품절 상품", "설명", new BigDecimal("20000"), new Stock(0), 0, null, null);
+        testProduct = new Product(1L, "테스트 상품", "설명", new BigDecimal("10000"), new Stock(100), 0, null, null);
+        stockEmptyProduct = new Product(2L, "품절 상품", "설명", new BigDecimal("20000"), new Stock(0), 0, null, null);
     }
 
     @Test
     @DisplayName("상품 단건 조회 - 성공 및 조회수 증가")
     void get_product_success() {
         // given
-        when(productRepository.findOne(1)).thenReturn(testProduct);
-        when(productStatisticsRepository.findByProductIdAndDate(anyInt(), any(LocalDate.class)))
+        when(productRepository.findOne(1L)).thenReturn(testProduct);
+        when(productStatisticsRepository.findByProductIdAndDate(anyLong(), any(LocalDate.class)))
                 .thenReturn(Optional.empty());
-        when(productStatisticsRepository.generateId()).thenReturn(1);
 
         // when
-        Product result = productService.getProduct(1);
+        Product result = productService.getProduct(1L);
 
         // then
         assertNotNull(result);
@@ -67,10 +66,10 @@ public class ProductServiceTest {
     @DisplayName("상품 단건 조회 - 상품 없음 실패")
     void get_product_not_found_fail() {
         // given
-        when(productRepository.findOne(999)).thenReturn(null);
+        when(productRepository.findOne(999L)).thenReturn(null);
 
         // when & then
-        assertThrows(IllegalArgumentException.class, () -> productService.getProduct(999));
+        assertThrows(IllegalArgumentException.class, () -> productService.getProduct(999L));
     }
 
     @Test
@@ -91,10 +90,10 @@ public class ProductServiceTest {
     @DisplayName("재고 존재 여부 확인 - 재고 있음")
     void check_stock_available_true() {
         // given
-        when(productRepository.findOne(1)).thenReturn(testProduct);
+        when(productRepository.findOne(1L)).thenReturn(testProduct);
 
         // when
-        boolean result = productService.checkStockAvailable(1);
+        boolean result = productService.checkStockAvailable(1L);
 
         // then
         assertTrue(result);
@@ -104,10 +103,10 @@ public class ProductServiceTest {
     @DisplayName("재고 존재 여부 확인 - 재고 없음")
     void check_stock_available_false() {
         // given
-        when(productRepository.findOne(2)).thenReturn(stockEmptyProduct);
+        when(productRepository.findOne(2L)).thenReturn(stockEmptyProduct);
 
         // when
-        boolean result = productService.checkStockAvailable(2);
+        boolean result = productService.checkStockAvailable(2L);
 
         // then
         assertFalse(result);
@@ -117,10 +116,10 @@ public class ProductServiceTest {
     @DisplayName("재고 충분 여부 확인 - 충분함")
     void check_stock_enough_true() {
         // given
-        when(productRepository.findOne(1)).thenReturn(testProduct);
+        when(productRepository.findOne(1L)).thenReturn(testProduct);
 
         // when
-        boolean result = productService.checkStockEnough(1, 50);
+        boolean result = productService.checkStockEnough(1L, 50);
 
         // then
         assertTrue(result);
@@ -130,11 +129,11 @@ public class ProductServiceTest {
     @DisplayName("재고 충분 여부 확인 - 부족함")
     void check_stock_enough_false() {
         // given
-        Product lowStockProduct = new Product(3, "재고 적은 상품", "설명", new BigDecimal("5000"), new Stock(10), 0, null, null);
-        when(productRepository.findOne(3)).thenReturn(lowStockProduct);
+        Product lowStockProduct = new Product(3L, "재고 적은 상품", "설명", new BigDecimal("5000"), new Stock(10), 0, null, null);
+        when(productRepository.findOne(3L)).thenReturn(lowStockProduct);
 
         // when
-        boolean result = productService.checkStockEnough(3, 50);
+        boolean result = productService.checkStockEnough(3L, 50);
 
         // then
         assertFalse(result);
@@ -144,10 +143,10 @@ public class ProductServiceTest {
     @DisplayName("재고 차감 - 성공")
     void deduct_stock_success() {
         // given
-        when(productRepository.findOne(1)).thenReturn(testProduct);
+        when(productRepository.findOne(1L)).thenReturn(testProduct);
 
         // when
-        productService.deductStock(1, 30);
+        productService.deductStock(1L, 30);
 
         // then
         assertEquals(70, testProduct.getStock().getQuantity());
@@ -158,22 +157,22 @@ public class ProductServiceTest {
     @DisplayName("재고 차감 - 상품 없음 실패")
     void deduct_stock_product_not_found_fail() {
         // given
-        when(productRepository.findOne(999)).thenReturn(null);
+        when(productRepository.findOne(999L)).thenReturn(null);
 
         // when & then
-        assertThrows(IllegalArgumentException.class, () -> productService.deductStock(999, 10));
+        assertThrows(IllegalArgumentException.class, () -> productService.deductStock(999L, 10));
     }
 
     @Test
     @DisplayName("재고 차감 - 품절 상품 실패")
     void deduct_stock_out_of_stock_fail() {
         // given
-        when(productRepository.findOne(2)).thenReturn(stockEmptyProduct);
+        when(productRepository.findOne(2L)).thenReturn(stockEmptyProduct);
 
         // when & then
         NotEnoughStockException exception = assertThrows(
                 NotEnoughStockException.class,
-                () -> productService.deductStock(2, 10)
+                () -> productService.deductStock(2L, 10)
         );
         assertEquals("품절된 상품입니다.", exception.getMessage());
     }
@@ -182,13 +181,13 @@ public class ProductServiceTest {
     @DisplayName("재고 차감 - 재고 부족 실패")
     void deduct_stock_not_enough_fail() {
         // given
-        Product lowStockProduct = new Product(3, "재고 적은 상품", "설명", new BigDecimal("5000"), new Stock(10), 0, null, null);
-        when(productRepository.findOne(3)).thenReturn(lowStockProduct);
+        Product lowStockProduct = new Product(3L, "재고 적은 상품", "설명", new BigDecimal("5000"), new Stock(10), 0, null, null);
+        when(productRepository.findOne(3L)).thenReturn(lowStockProduct);
 
         // when & then
         NotEnoughStockException exception = assertThrows(
                 NotEnoughStockException.class,
-                () -> productService.deductStock(3, 20)
+                () -> productService.deductStock(3L, 20)
         );
         assertTrue(exception.getMessage().contains("재고가 부족합니다"));
     }
@@ -198,10 +197,10 @@ public class ProductServiceTest {
     void restore_stock_success() {
         // given
         testProduct.deductStock(30); // 재고를 70으로 만듦
-        when(productRepository.findOne(1)).thenReturn(testProduct);
+        when(productRepository.findOne(1L)).thenReturn(testProduct);
 
         // when
-        productService.restoreStock(1, 20);
+        productService.restoreStock(1L, 20);
 
         // then
         assertEquals(90, testProduct.getStock().getQuantity());
@@ -212,9 +211,9 @@ public class ProductServiceTest {
     @DisplayName("재고 복구 - 상품 없음 실패")
     void restore_stock_product_not_found_fail() {
         // given
-        when(productRepository.findOne(999)).thenReturn(null);
+        when(productRepository.findOne(999L)).thenReturn(null);
 
         // when & then
-        assertThrows(IllegalArgumentException.class, () -> productService.restoreStock(999, 10));
+        assertThrows(IllegalArgumentException.class, () -> productService.restoreStock(999L, 10));
     }
 }

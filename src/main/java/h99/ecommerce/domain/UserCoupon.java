@@ -1,29 +1,58 @@
 package h99.ecommerce.domain;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
 
+@Entity
+@Table(name = "user_coupon")
 @Getter
 @Builder
 public class UserCoupon {
 
-    private int userCouponId;
-    private int userId;
-    private int couponId;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long userCouponId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "coupon_id")
+    private Coupon coupon;
+
+    @Column(name = "is_used")
     private boolean isUsed;
+
+    @Column(name = "used_at")
     private LocalDateTime usedAt;
+
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    public UserCoupon(int userCouponId, int userId, int couponId, boolean isUsed, 
+    public UserCoupon(Long userCouponId, User user, Coupon coupon, boolean isUsed,
                       LocalDateTime usedAt, LocalDateTime createdAt) {
         this.userCouponId = userCouponId;
-        this.userId = userId;
-        this.couponId = couponId;
+        this.user = user;
+        this.coupon = coupon;
         this.isUsed = isUsed;
         this.usedAt = usedAt;
         this.createdAt = createdAt == null ? LocalDateTime.now() : createdAt;
+    }
+
+    public UserCoupon() {
+        
     }
 
     /**
@@ -49,5 +78,13 @@ public class UserCoupon {
      */
     public boolean isUsed() {
         return this.isUsed;
+    }
+
+    public Long getUserId() {
+        return user != null ? user.getUserId() : null;
+    }
+
+    public Long getCouponId() {
+        return coupon != null ? coupon.getCouponId() : null;
     }
 }

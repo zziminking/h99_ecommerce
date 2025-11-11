@@ -5,9 +5,11 @@ import h99.ecommerce.domain.Order;
 import h99.ecommerce.domain.OrderItem;
 import h99.ecommerce.domain.OrderStatus;
 import h99.ecommerce.domain.Product;
+import h99.ecommerce.domain.User;
 import h99.ecommerce.exception.NotEnoughStockException;
 import h99.ecommerce.repository.CartItemRepository;
 import h99.ecommerce.repository.OrderRepository;
+import h99.ecommerce.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -15,6 +17,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
@@ -25,22 +28,25 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final ProductService productService;
     private final PaymentService paymentService;
+    private final UserRepository userRepository;
 
     /**
      * 장바구니 기반 주문 생성
      */
-    public Order createOrder(int userId, Integer userCouponId) {
+    @Transactional
+    public Order createOrder(Long userId, Long userCouponId) {
         // 1. 장바구니 조회
         List<CartItem> cartItems = cartItemRepository.findByUserId(userId);
         if (cartItems == null || cartItems.isEmpty()) {
             throw new IllegalArgumentException("장바구니가 비어있습니다.");
         }
 
+        // User 조회
+        User user = userRepository.findOne(userId);
+
         // 2. 주문 생성
-        int orderId = orderRepository.generateId();
         Order order = Order.builder()
-                .orderId(orderId)
-                .userId(userId)
+                .user(user)
                 .totalQuantity(0)
                 .totalPrice(BigDecimal.ZERO)
                 .orderItems(new ArrayList<>())
@@ -55,7 +61,7 @@ public class OrderService {
                 productService.deductStock(cartItem.getProductId(), cartItem.getQuantity());
 
                 // 주문 아이템 생성
-                OrderItem orderItem = createOrderItem(order.getOrderId(), cartItem, product);
+                OrderItem orderItem = createOrderItem(order, cartItem, product);
                 order.addOrderItem(orderItem);
 
                 // 주문 수량 통계 업데이트
@@ -94,15 +100,14 @@ public class OrderService {
     /**
      * 주문 아이템 생성
      */
-    private OrderItem createOrderItem(int orderId, CartItem cartItem, Product product) {
+    private OrderItem createOrderItem(Order orderId, CartItem cartItem, Product product) {
         BigDecimal itemPrice = product.getPrice();
         int quantity = cartItem.getQuantity();
         BigDecimal totalAmount = itemPrice.multiply(new BigDecimal(quantity));
 
         OrderItem orderItem = OrderItem.builder()
-                .orderItemId(0) // Repository에서 생성
-                .orderId(orderId)
-                .productId(cartItem.getProductId())
+                .order(orderId)
+                .product(product)
                 .quantity(quantity)
                 .status(OrderStatus.PENDING)
                 .price(itemPrice)
@@ -141,7 +146,7 @@ public class OrderService {
     /**
      * 장바구니 비우기
      */
-    private void clearCart(int userId) {
+    private void clearCart(Long userId) {
         List<CartItem> cartItems = cartItemRepository.findByUserId(userId);
         for (CartItem cartItem : cartItems) {
             cartItemRepository.delete(cartItem.getCartItemId());
@@ -151,7 +156,7 @@ public class OrderService {
     /**
      * 주문 조회
      */
-    public Order getOrder(int orderId) {
+    public Order getOrder(Long orderId) {
         Order order = orderRepository.findOne(orderId);
         if (order == null) {
             throw new IllegalArgumentException("주문을 찾을 수 없습니다. orderId: " + orderId);
@@ -162,7 +167,7 @@ public class OrderService {
     /**
      * 사용자별 주문 목록 조회
      */
-    public List<Order> getOrdersByUserId(int userId) {
+    public List<Order> getOrdersByUserId(Long userId) {
         return orderRepository.findByUserId(userId);
     }
 }

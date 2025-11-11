@@ -30,7 +30,7 @@ public class StockTest {
 
         Stock result = stock.add(other);
 
-        assertEquals(15, result.quantity);
+        assertEquals(15, result.getQuantity());
     }
 
     @Test
@@ -41,17 +41,10 @@ public class StockTest {
 
         Stock result = stock.reduce(other);
 
-        assertEquals(5, result.quantity);
+        assertEquals(5, result.getQuantity());
     }
 
-    @Test
-    @DisplayName("재고 복구 - 성공")
-    void rollback_stock_success() {
-        Stock stock = new Stock(10);
-        Stock reducedStock = stock.reduce(new Stock(5));
-        Stock rolledBackStock = reducedStock.rollback();
-
-        assertEquals(10, rolledBackStock.quantity);
-    }
+    // previousStock 기능 제거로 인해 rollback 테스트 삭제
+    // 재고 복구는 restoreStock(add) 메서드로 처리됨
 
 }

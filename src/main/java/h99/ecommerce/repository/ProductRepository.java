@@ -5,13 +5,11 @@ import java.util.List;
 
 public interface ProductRepository {
 
-    int generateId();
-
     Product save(Product product);
 
-    Product findOne(int productId);
+    Product findOne(Long productId);
 
     List<Product> findAll();
 
-    void delete(int productId);
+    void delete(Long productId);
 }

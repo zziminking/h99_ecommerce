@@ -20,6 +20,7 @@ import java.util.Collections;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -37,6 +38,9 @@ public class OrderServiceTest {
     @Mock
     private PaymentService paymentService;
 
+    @Mock
+    private h99.ecommerce.repository.UserRepository userRepository;
+
     @InjectMocks
     private OrderService orderService;
 
@@ -45,20 +49,26 @@ public class OrderServiceTest {
 
     @BeforeEach
     void setUp() {
-        cartItem = new CartItem(1, 100, 1, 3);
-        product = new Product(1, "테스트 상품", "설명", new BigDecimal("10000"), new Stock(100), 0, null, null);
+        cartItem = new CartItem(1L, 100L, 1L, 3);
+        product = new Product(1L, "테스트 상품", "설명", new BigDecimal("10000"), new Stock(100), 0, null, null);
     }
 
     @Test
     @DisplayName("주문 생성 - 성공")
     void create_order_success() {
         // given
-        int userId = 100;
+        Long userId = 100L;
+        User mockUser = User.builder()
+                .userId(userId)
+                .username("testUser")
+                .point(new BigDecimal("100000"))
+                .build();
+        when(userRepository.findOne(userId)).thenReturn(mockUser);
         when(cartItemRepository.findByUserId(userId)).thenReturn(Arrays.asList(cartItem));
-        when(orderRepository.generateId()).thenReturn(1);
-        when(productService.getProduct(1)).thenReturn(product);
-        doNothing().when(productService).deductStock(anyInt(), anyInt());
-        doNothing().when(paymentService).processPayment(anyInt(), anyInt(), any(BigDecimal.class), any());
+        when(productService.getProduct(1L)).thenReturn(product);
+        doNothing().when(productService).deductStock(anyLong(), anyInt());
+        doNothing().when(productService).updateOrderStatistics(anyLong(), anyInt());
+        doNothing().when(paymentService).processPayment(anyLong(), any(), any(BigDecimal.class), any());
         when(orderRepository.save(any(Order.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         // when
@@ -69,7 +79,7 @@ public class OrderServiceTest {
         assertEquals(userId, order.getUserId());
         assertEquals(1, order.getOrderItems().size());
         verify(orderRepository).save(any(Order.class));
-        verify(paymentService).processPayment(eq(userId), eq(1), any(BigDecimal.class), isNull());
+        verify(paymentService).processPayment(eq(userId), any(), any(BigDecimal.class), isNull());
         verify(cartItemRepository).delete(cartItem.getCartItemId());
     }
 
@@ -77,13 +87,19 @@ public class OrderServiceTest {
     @DisplayName("주문 생성 - 쿠폰 적용")
     void create_order_with_coupon_success() {
         // given
-        int userId = 100;
-        Integer userCouponId = 1;
+        Long userId = 100L;
+        Long userCouponId = 1L;
+        User mockUser = User.builder()
+                .userId(userId)
+                .username("testUser")
+                .point(new BigDecimal("100000"))
+                .build();
+        when(userRepository.findOne(userId)).thenReturn(mockUser);
         when(cartItemRepository.findByUserId(userId)).thenReturn(Arrays.asList(cartItem));
-        when(orderRepository.generateId()).thenReturn(1);
-        when(productService.getProduct(1)).thenReturn(product);
-        doNothing().when(productService).deductStock(anyInt(), anyInt());
-        doNothing().when(paymentService).processPayment(anyInt(), anyInt(), any(BigDecimal.class), any());
+        when(productService.getProduct(1L)).thenReturn(product);
+        doNothing().when(productService).deductStock(anyLong(), anyInt());
+        doNothing().when(productService).updateOrderStatistics(anyLong(), anyInt());
+        doNothing().when(paymentService).processPayment(anyLong(), any(), any(BigDecimal.class), any());
         when(orderRepository.save(any(Order.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         // when
@@ -91,14 +107,14 @@ public class OrderServiceTest {
 
         // then
         assertNotNull(order);
-        verify(paymentService).processPayment(eq(userId), eq(1), any(BigDecimal.class), eq(userCouponId));
+        verify(paymentService).processPayment(eq(userId), any(), any(BigDecimal.class), eq(userCouponId));
     }
 
     @Test
     @DisplayName("주문 생성 - 장바구니 비어있음 실패")
     void create_order_empty_cart_fail() {
         // given
-        int userId = 100;
+        Long userId = 100L;
         when(cartItemRepository.findByUserId(userId)).thenReturn(Collections.emptyList());
 
         // when & then
@@ -112,37 +128,48 @@ public class OrderServiceTest {
     @DisplayName("주문 생성 - 재고 부족 시 롤백")
     void create_order_stock_shortage_rollback() {
         // given
-        int userId = 100;
+        Long userId = 100L;
+        User mockUser = User.builder()
+                .userId(userId)
+                .username("testUser")
+                .point(new BigDecimal("100000"))
+                .build();
+        when(userRepository.findOne(userId)).thenReturn(mockUser);
         when(cartItemRepository.findByUserId(userId)).thenReturn(Arrays.asList(cartItem));
-        when(orderRepository.generateId()).thenReturn(1);
-        when(productService.getProduct(1)).thenReturn(product);
-        doThrow(new NotEnoughStockException("재고 부족")).when(productService).deductStock(1, 3);
+        when(productService.getProduct(1L)).thenReturn(product);
+        doThrow(new NotEnoughStockException("재고 부족")).when(productService).deductStock(1L, 3);
 
         // when & then
         assertThrows(NotEnoughStockException.class, () ->
                 orderService.createOrder(userId, null)
         );
         verify(orderRepository, never()).save(any(Order.class));
-        verify(paymentService, never()).processPayment(anyInt(), anyInt(), any(BigDecimal.class), any());
+        verify(paymentService, never()).processPayment(anyLong(), anyLong(), any(BigDecimal.class), any());
     }
 
     @Test
     @DisplayName("주문 생성 - 결제 실패 시 재고 복구")
     void create_order_payment_fail_restore_stock() {
         // given
-        int userId = 100;
+        Long userId = 100L;
+        User mockUser = User.builder()
+                .userId(userId)
+                .username("testUser")
+                .point(new BigDecimal("100000"))
+                .build();
+        when(userRepository.findOne(userId)).thenReturn(mockUser);
         when(cartItemRepository.findByUserId(userId)).thenReturn(Arrays.asList(cartItem));
-        when(orderRepository.generateId()).thenReturn(1);
-        when(productService.getProduct(1)).thenReturn(product);
-        doNothing().when(productService).deductStock(anyInt(), anyInt());
+        when(productService.getProduct(1L)).thenReturn(product);
+        doNothing().when(productService).deductStock(anyLong(), anyInt());
+        doNothing().when(productService).updateOrderStatistics(anyLong(), anyInt());
         doThrow(new IllegalStateException("결제 실패")).when(paymentService)
-                .processPayment(anyInt(), anyInt(), any(BigDecimal.class), any());
+                .processPayment(anyLong(), any(), any(BigDecimal.class), any());
 
         // when & then
         assertThrows(IllegalStateException.class, () ->
                 orderService.createOrder(userId, null)
         );
-        verify(productService).restoreStock(1, 3);
+        verify(productService).restoreStock(1L, 3);
         verify(orderRepository, never()).save(any(Order.class));
     }
 
@@ -150,10 +177,14 @@ public class OrderServiceTest {
     @DisplayName("주문 조회 - 성공")
     void get_order_success() {
         // given
-        int orderId = 1;
+        Long orderId = 1L;
         Order order = Order.builder()
                 .orderId(orderId)
-                .userId(100)
+                .user(User.builder()
+                        .userId(100L)
+                        .username("testUser")
+                        .point(new BigDecimal("100000"))
+                        .build())
                 .totalQuantity(3)
                 .totalPrice(new BigDecimal("30000"))
                 .build();
@@ -172,7 +203,7 @@ public class OrderServiceTest {
     @DisplayName("주문 조회 - 주문 없음 실패")
     void get_order_not_found_fail() {
         // given
-        int orderId = 999;
+        Long orderId = 999L;
         when(orderRepository.findOne(orderId)).thenReturn(null);
 
         // when & then
@@ -185,9 +216,14 @@ public class OrderServiceTest {
     @DisplayName("사용자별 주문 목록 조회 - 성공")
     void get_orders_by_user_id_success() {
         // given
-        int userId = 100;
-        Order order1 = Order.builder().orderId(1).userId(userId).build();
-        Order order2 = Order.builder().orderId(2).userId(userId).build();
+        Long userId = 100L;
+        User testUser = User.builder()
+                .userId(100L)
+                .username("testUser")
+                .point(new BigDecimal("100000"))
+                .build();
+        Order order1 = Order.builder().orderId(1L).user(testUser).build();
+        Order order2 = Order.builder().orderId(2L).user(testUser).build();
         when(orderRepository.findByUserId(userId)).thenReturn(Arrays.asList(order1, order2));
 
         // when
@@ -202,7 +238,7 @@ public class OrderServiceTest {
     @DisplayName("사용자별 주문 목록 조회 - 빈 목록")
     void get_orders_by_user_id_empty() {
         // given
-        int userId = 100;
+        Long userId = 100L;
         when(orderRepository.findByUserId(userId)).thenReturn(Collections.emptyList());
 
         // when

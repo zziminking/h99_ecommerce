@@ -6,17 +6,15 @@ import java.util.Optional;
 
 public interface CartItemRepository {
 
-    int generateId();
-
     CartItem save(CartItem cartItem);
 
-    CartItem findOne(int cartItemId);
+    CartItem findOne(Long cartItemId);
 
-    List<CartItem> findByUserId(int userId);
+    List<CartItem> findByUserId(Long userId);
 
-    Optional<CartItem> findByUserIdAndProductId(int userId, int productId);
+    Optional<CartItem> findByUserIdAndProductId(Long userId, Long productId);
 
-    void updateQuantity(int cartItemId, int newQuantity);
+    void updateQuantity(Long cartItemId, int newQuantity);
 
-    void delete(int cartItemId);
+    void delete(Long cartItemId);
 }

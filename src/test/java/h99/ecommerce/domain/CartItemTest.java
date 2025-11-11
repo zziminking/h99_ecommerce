@@ -11,9 +11,9 @@ public class CartItemTest {
     @DisplayName("장바구니 아이템 생성 - 성공")
     void create_cart_item_success() {
         // given
-        int cartItemId = 1;
-        int userId = 100;
-        int productId = 200;
+        Long cartItemId = 1L;
+        Long userId = 100L;
+        Long productId = 200L;
         int quantity = 5;
 
         // when
@@ -30,9 +30,9 @@ public class CartItemTest {
     @DisplayName("장바구니 아이템 생성 시 수량이 0이면 예외 발생")
     void create_cart_item_with_zero_quantity_fail() {
         // given
-        int cartItemId = 1;
-        int userId = 100;
-        int productId = 200;
+        Long cartItemId = 1L;
+        Long userId = 100L;
+        Long productId = 200L;
         int quantity = 0;
 
         // when & then
@@ -47,9 +47,9 @@ public class CartItemTest {
     @DisplayName("장바구니 아이템 생성 시 수량이 음수면 예외 발생")
     void create_cart_item_with_negative_quantity_fail() {
         // given
-        int cartItemId = 1;
-        int userId = 100;
-        int productId = 200;
+        Long cartItemId = 1L;
+        Long userId = 100L;
+        Long productId = 200L;
         int quantity = -5;
 
         // when & then
@@ -64,7 +64,7 @@ public class CartItemTest {
     @DisplayName("수량 업데이트 - 성공")
     void update_quantity_success() {
         // given
-        CartItem cartItem = new CartItem(1, 100, 200, 5);
+        CartItem cartItem = new CartItem(1L, 100L, 200L, 5);
         int newQuantity = 10;
 
         // when
@@ -78,7 +78,7 @@ public class CartItemTest {
     @DisplayName("수량 업데이트 시 0 이하면 예외 발생")
     void update_quantity_with_zero_fail() {
         // given
-        CartItem cartItem = new CartItem(1, 100, 200, 5);
+        CartItem cartItem = new CartItem(1L, 100L, 200L, 5);
 
         // when & then
         IllegalArgumentException exception = assertThrows(
@@ -92,7 +92,7 @@ public class CartItemTest {
     @DisplayName("수량 업데이트 시 음수면 예외 발생")
     void update_quantity_with_negative_fail() {
         // given
-        CartItem cartItem = new CartItem(1, 100, 200, 5);
+        CartItem cartItem = new CartItem(1L, 100L, 200L, 5);
 
         // when & then
         IllegalArgumentException exception = assertThrows(
@@ -106,7 +106,7 @@ public class CartItemTest {
     @DisplayName("수량 추가 - 성공")
     void add_quantity_success() {
         // given
-        CartItem cartItem = new CartItem(1, 100, 200, 5);
+        CartItem cartItem = new CartItem(1L, 100L, 200L, 5);
         int additionalQuantity = 3;
 
         // when
@@ -120,7 +120,7 @@ public class CartItemTest {
     @DisplayName("수량 추가 시 0 이하면 예외 발생")
     void add_quantity_with_zero_fail() {
         // given
-        CartItem cartItem = new CartItem(1, 100, 200, 5);
+        CartItem cartItem = new CartItem(1L, 100L, 200L, 5);
 
         // when & then
         IllegalArgumentException exception = assertThrows(
@@ -134,7 +134,7 @@ public class CartItemTest {
     @DisplayName("수량 추가 시 음수면 예외 발생")
     void add_quantity_with_negative_fail() {
         // given
-        CartItem cartItem = new CartItem(1, 100, 200, 5);
+        CartItem cartItem = new CartItem(1L, 100L, 200L, 5);
 
         // when & then
         IllegalArgumentException exception = assertThrows(
@@ -149,9 +149,9 @@ public class CartItemTest {
     void create_with_builder_success() {
         // given & when
         CartItem cartItem = CartItem.builder()
-                .cartItemId(1)
-                .userId(100)
-                .productId(200)
+                .cartItemId(1L)
+                .userId(100L)
+                .productId(200L)
                 .quantity(5)
                 .build();
 

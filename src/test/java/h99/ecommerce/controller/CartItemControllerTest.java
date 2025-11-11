@@ -43,13 +43,13 @@ class CartItemControllerTest {
     @DisplayName("장바구니 조회 API 성공")
     void getCart_Success() throws Exception {
         // given
-        Product product1 = new Product(1, "상품1", "설명1", new BigDecimal("10000"), new Stock(10), 0, LocalDateTime.now(), LocalDateTime.now());
-        Product product2 = new Product(2, "상품2", "설명2", new BigDecimal("20000"), new Stock(20), 0, LocalDateTime.now(), LocalDateTime.now());
+        Product product1 = new Product(1L, "상품1", "설명1", new BigDecimal("10000"), new Stock(10), 0, LocalDateTime.now(), LocalDateTime.now());
+        Product product2 = new Product(2L, "상품2", "설명2", new BigDecimal("20000"), new Stock(20), 0, LocalDateTime.now(), LocalDateTime.now());
 
         List<CartItemDto> cartItems = Arrays.asList(
                 CartItemDto.builder()
-                        .cartItemId(1)
-                        .userId(1)
+                        .cartItemId(1L)
+                        .userId(1L)
                         .product(product1)
                         .productName("상품1")
                         .price(new BigDecimal("10000"))
@@ -57,8 +57,8 @@ class CartItemControllerTest {
                         .totalAmount(new BigDecimal("20000"))
                         .build(),
                 CartItemDto.builder()
-                        .cartItemId(2)
-                        .userId(1)
+                        .cartItemId(2L)
+                        .userId(1L)
                         .product(product2)
                         .productName("상품2")
                         .price(new BigDecimal("20000"))
@@ -66,7 +66,7 @@ class CartItemControllerTest {
                         .totalAmount(new BigDecimal("20000"))
                         .build()
         );
-        given(cartItemService.getCart(1)).willReturn(cartItems);
+        given(cartItemService.getCart(1L)).willReturn(cartItems);
 
         // when & then
         mockMvc.perform(get("/api/cart/1"))
@@ -96,7 +96,7 @@ class CartItemControllerTest {
     void getCartTotal_Success() throws Exception {
         // given
         BigDecimal total = new BigDecimal("40000");
-        given(cartItemService.getCartTotal(1)).willReturn(total);
+        given(cartItemService.getCartTotal(1L)).willReturn(total);
 
         // when & then
         mockMvc.perform(get("/api/cart/1/total"))
@@ -116,7 +116,7 @@ class CartItemControllerTest {
     @DisplayName("장바구니 추가 API 성공")
     void addToCart_Success() throws Exception {
         // given
-        CartAddRequest request = new CartAddRequest(1, 1, 2);
+        CartAddRequest request = new CartAddRequest(1L, 1L, 2);
 
         // when & then
         mockMvc.perform(post("/api/cart")
@@ -131,7 +131,7 @@ class CartItemControllerTest {
     @DisplayName("장바구니 추가 API - 잘못된 userId")
     void addToCart_InvalidUserId() throws Exception {
         // given
-        CartAddRequest request = new CartAddRequest(0, 1, 2);
+        CartAddRequest request = new CartAddRequest(0L, 1L, 2);
 
         // when & then
         mockMvc.perform(post("/api/cart")
@@ -144,7 +144,7 @@ class CartItemControllerTest {
     @DisplayName("장바구니 추가 API - 잘못된 productId")
     void addToCart_InvalidProductId() throws Exception {
         // given
-        CartAddRequest request = new CartAddRequest(1, 0, 2);
+        CartAddRequest request = new CartAddRequest(1L, 0L, 2);
 
         // when & then
         mockMvc.perform(post("/api/cart")
@@ -157,7 +157,7 @@ class CartItemControllerTest {
     @DisplayName("장바구니 추가 API - 잘못된 quantity")
     void addToCart_InvalidQuantity() throws Exception {
         // given
-        CartAddRequest request = new CartAddRequest(1, 1, 0);
+        CartAddRequest request = new CartAddRequest(1L, 1L, 0);
 
         // when & then
         mockMvc.perform(post("/api/cart")
@@ -178,7 +178,7 @@ class CartItemControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk());
 
-        verify(cartItemService).updateCartItemQuantity(eq(1), eq(5));
+        verify(cartItemService).updateCartItemQuantity(eq(1L), eq(5));
     }
 
     @Test
@@ -214,7 +214,7 @@ class CartItemControllerTest {
         mockMvc.perform(delete("/api/cart/1"))
                 .andExpect(status().isNoContent());
 
-        verify(cartItemService).removeCartItem(1);
+        verify(cartItemService).removeCartItem(1L);
     }
 
     @Test

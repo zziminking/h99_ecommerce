@@ -2,6 +2,7 @@ package h99.ecommerce.infrastructure.repository;
 
 import h99.ecommerce.domain.Coupon;
 import h99.ecommerce.repository.CouponRepository;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
@@ -11,15 +12,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Repository
+@Profile("test")
 public class InMemoryCouponRepository implements CouponRepository {
 
-    private final Map<Integer, Coupon> store = new ConcurrentHashMap<>();
-    private final AtomicInteger idGenerator = new AtomicInteger(1);
-
-    @Override
-    public int generateId() {
-        return idGenerator.getAndIncrement();
-    }
+    private final Map<Long, Coupon> store = new ConcurrentHashMap<>();
 
     @Override
     public Coupon save(Coupon coupon) {
@@ -31,7 +27,7 @@ public class InMemoryCouponRepository implements CouponRepository {
     }
 
     @Override
-    public Coupon findOne(int couponId) {
+    public Coupon findOne(Long couponId) {
         return store.get(couponId);
     }
 

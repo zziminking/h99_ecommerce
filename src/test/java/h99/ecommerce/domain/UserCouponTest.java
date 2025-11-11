@@ -9,22 +9,24 @@ import static org.junit.jupiter.api.Assertions.*;
 public class UserCouponTest {
 
     private UserCoupon userCoupon;
+    private User user;
+    private Coupon coupon;
 
     @BeforeEach
     void setUp() {
-        userCoupon = new UserCoupon(1, 100, 1, false, null, null);
+        userCoupon = new UserCoupon(1L, user, coupon, false, null, null);
     }
 
     @Test
     @DisplayName("사용자 쿠폰 생성 - 성공")
     void create_user_coupon_success() {
         // given & when
-        UserCoupon newUserCoupon = new UserCoupon(2, 200, 2, false, null, null);
+        UserCoupon newUserCoupon = new UserCoupon(2L, user, coupon, false, null, null);
 
         // then
         assertEquals(2, newUserCoupon.getUserCouponId());
-        assertEquals(200, newUserCoupon.getUserId());
-        assertEquals(2, newUserCoupon.getCouponId());
+        assertEquals(200, newUserCoupon.getUser());
+        assertEquals(2, newUserCoupon.getCoupon());
         assertFalse(newUserCoupon.isUsed());
         assertNull(newUserCoupon.getUsedAt());
         assertNotNull(newUserCoupon.getCreatedAt());

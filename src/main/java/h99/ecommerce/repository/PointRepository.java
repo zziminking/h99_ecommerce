@@ -6,8 +6,6 @@ import java.util.List;
 
 public interface PointRepository {
 
-    int generateId();
-
     Point save(Point point);
 
     Point findOne(int pointId);

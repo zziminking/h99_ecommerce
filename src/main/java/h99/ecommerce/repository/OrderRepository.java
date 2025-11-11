@@ -5,11 +5,9 @@ import java.util.List;
 
 public interface OrderRepository {
 
-    int generateId();
-
     Order save(Order order);
 
-    Order findOne(int orderId);
+    Order findOne(Long orderId);
 
-    List<Order> findByUserId(int userId);
+    List<Order> findByUserId(Long userId);
 }
