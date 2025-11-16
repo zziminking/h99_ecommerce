@@ -8,9 +8,9 @@ import lombok.Getter;
 @Getter
 @Builder
 public class CartItemDto {
-    
-    private Integer cartItemId;
-    private Integer userId;
+
+    private Long cartItemId;
+    private Long userId;
     private Product product;
     private String productName;
     private BigDecimal price;

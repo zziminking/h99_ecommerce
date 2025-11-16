@@ -22,7 +22,7 @@ public class ProductService {
     /**
      * 상품 단건 조회
      */
-    public Product getProduct(int productId) {
+    public Product getProduct(Long productId) {
         Product product = productRepository.findOne(productId);
         if (product == null) {
             throw new IllegalArgumentException("상품을 찾을 수 없습니다. productId: " + productId);
@@ -48,7 +48,7 @@ public class ProductService {
     /**
      * 재고 존재 여부 확인
      */
-    public boolean checkStockAvailable(int productId) {
+    public boolean checkStockAvailable(Long productId) {
         Product product = productRepository.findOne(productId);
         if (product == null) {
             throw new IllegalArgumentException("상품을 찾을 수 없습니다. productId: " + productId);
@@ -59,7 +59,7 @@ public class ProductService {
     /**
      * 재고 충분 여부 확인
      */
-    public boolean checkStockEnough(int productId, int quantity) {
+    public boolean checkStockEnough(Long productId, int quantity) {
         Product product = productRepository.findOne(productId);
         if (product == null) {
             throw new IllegalArgumentException("상품을 찾을 수 없습니다. productId: " + productId);
@@ -70,7 +70,7 @@ public class ProductService {
     /**
      * 재고 차감
      */
-    public void deductStock(int productId, int quantity) {
+    public void deductStock(Long productId, int quantity) {
         Product product = productRepository.findOne(productId);
         if (product == null) {
             throw new IllegalArgumentException("상품을 찾을 수 없습니다. productId: " + productId);
@@ -91,7 +91,7 @@ public class ProductService {
     /**
      * 재고 복구
      */
-    public void restoreStock(int productId, int quantity) {
+    public void restoreStock(Long productId, int quantity) {
         Product product = productRepository.findOne(productId);
         if (product == null) {
             throw new IllegalArgumentException("상품을 찾을 수 없습니다. productId: " + productId);
@@ -104,7 +104,7 @@ public class ProductService {
     /**
      * 일별 조회수 통계 업데이트
      */
-    private void updateDailyViewStatistics(int productId) {
+    private void updateDailyViewStatistics(Long productId) {
         LocalDate today = LocalDate.now();
         Optional<ProductStatistics> existingStats = productStatisticsRepository.findByProductIdAndDate(productId, today);
 
@@ -113,9 +113,7 @@ public class ProductService {
             stats.increaseViewCount();
             productStatisticsRepository.save(stats);
         } else {
-            int statsId = productStatisticsRepository.generateId();
             ProductStatistics newStats = ProductStatistics.builder()
-                    .statisticsId(statsId)
                     .productId(productId)
                     .statisticsDate(today)
                     .viewCount(1)
@@ -128,7 +126,7 @@ public class ProductService {
     /**
      * 주문 수량 통계 업데이트 (주문 서비스에서 호출)
      */
-    public void updateOrderStatistics(int productId, int quantity) {
+    public void updateOrderStatistics(Long productId, int quantity) {
         LocalDate today = LocalDate.now();
         Optional<ProductStatistics> existingStats = productStatisticsRepository.findByProductIdAndDate(productId, today);
 
@@ -137,9 +135,7 @@ public class ProductService {
             stats.increaseOrderCount(quantity);
             productStatisticsRepository.save(stats);
         } else {
-            int statsId = productStatisticsRepository.generateId();
             ProductStatistics newStats = ProductStatistics.builder()
-                    .statisticsId(statsId)
                     .productId(productId)
                     .statisticsDate(today)
                     .viewCount(0)
@@ -160,15 +156,15 @@ public class ProductService {
         List<ProductStatistics> recentStats = productStatisticsRepository.findByDateBetween(startDate, endDate);
 
         // 상품별 조회수 합산
-        Map<Integer, Integer> productViewCounts = recentStats.stream()
+        Map<Long, Integer> productViewCounts = recentStats.stream()
                 .collect(Collectors.groupingBy(
                         ProductStatistics::getProductId,
                         Collectors.summingInt(ProductStatistics::getViewCount)
                 ));
 
         // 조회수 순으로 정렬하여 상위 N개 추출
-        List<Integer> topProductIds = productViewCounts.entrySet().stream()
-                .sorted(Map.Entry.<Integer, Integer>comparingByValue().reversed())
+        List<Long> topProductIds = productViewCounts.entrySet().stream()
+                .sorted(Map.Entry.<Long, Integer>comparingByValue().reversed())
                 .limit(limit)
                 .map(Map.Entry::getKey)
                 .toList();
@@ -191,15 +187,15 @@ public class ProductService {
         List<ProductStatistics> recentStats = productStatisticsRepository.findByDateBetween(startDate, endDate);
 
         // 상품별 주문 수량 합산
-        Map<Integer, Integer> productOrderCounts = recentStats.stream()
+        Map<Long, Integer> productOrderCounts = recentStats.stream()
                 .collect(Collectors.groupingBy(
                         ProductStatistics::getProductId,
                         Collectors.summingInt(ProductStatistics::getOrderCount)
                 ));
 
         // 주문 수량 순으로 정렬하여 상위 N개 추출
-        List<Integer> topProductIds = productOrderCounts.entrySet().stream()
-                .sorted(Map.Entry.<Integer, Integer>comparingByValue().reversed())
+        List<Long> topProductIds = productOrderCounts.entrySet().stream()
+                .sorted(Map.Entry.<Long, Integer>comparingByValue().reversed())
                 .limit(limit)
                 .map(Map.Entry::getKey)
                 .toList();

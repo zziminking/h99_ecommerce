@@ -20,7 +20,7 @@ public class ProductTest {
     void setUp() {
         // 일반 상품 (재고 100개)
         testProduct = new Product(
-                1,
+                1L,
                 "테스트 상품",
                 "테스트 상품 설명",
                 new BigDecimal("10000"),
@@ -32,7 +32,7 @@ public class ProductTest {
 
         // 재고 없는 상품
         stockEmptyProduct = new Product(
-                2,
+                2L,
                 "품절 상품",
                 "품절된 상품",
                 new BigDecimal("20000"),
@@ -44,7 +44,7 @@ public class ProductTest {
 
         // 재고 적은 상품 (10개)
         lowStockProduct = new Product(
-                3,
+                3L,
                 "재고 적은 상품",
                 "재고가 적은 상품",
                 new BigDecimal("5000"),
@@ -59,7 +59,7 @@ public class ProductTest {
     @DisplayName("상품 생성 - 성공")
     void create_product_success() {
         // given
-        int productId = 1;
+        Long productId = 1L;
         String name = "테스트 상품";
         String description = "테스트 상품 설명";
         BigDecimal price = new BigDecimal("10000");
@@ -83,7 +83,7 @@ public class ProductTest {
     @DisplayName("상품 생성 시 Stock이 null이면 기본값 0으로 설정")
     void create_product_with_null_stock_success() {
         // given
-        int productId = 1;
+        Long productId = 1L;
         String name = "테스트 상품";
         String description = "설명";
         BigDecimal price = new BigDecimal("10000");
@@ -110,7 +110,7 @@ public class ProductTest {
         // when & then
         IllegalArgumentException exception = assertThrows(
                 IllegalArgumentException.class,
-                () -> new Product(1, name, description, price, stock, 0, null, null)
+                () -> new Product(1L, name, description, price, stock, 0, null, null)
         );
         assertEquals("가격은 필수입니다.", exception.getMessage());
     }
@@ -127,7 +127,7 @@ public class ProductTest {
         // when & then
         IllegalArgumentException exception = assertThrows(
                 IllegalArgumentException.class,
-                () -> new Product(1, name, description, price, stock, 0, null, null)
+                () -> new Product(1L, name, description, price, stock, 0, null, null)
         );
         assertEquals("가격은 0 이상이어야 합니다.", exception.getMessage());
     }
@@ -226,7 +226,7 @@ public class ProductTest {
     void create_with_builder_success() {
         // given & when
         Product product = Product.builder()
-                .productId(1)
+                .productId(1L)
                 .name("테스트 상품")
                 .description("테스트 설명")
                 .price(new BigDecimal("10000"))

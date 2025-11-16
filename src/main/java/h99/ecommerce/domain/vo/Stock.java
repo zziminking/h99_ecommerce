@@ -1,33 +1,29 @@
 package h99.ecommerce.domain.vo;
 
 import h99.ecommerce.exception.NotEnoughStockException;
+import jakarta.persistence.Embeddable;
 import java.util.Objects;
 import lombok.Getter;
 
+@Embeddable
 @Getter
 public class Stock {
 
-    public final int quantity;
-    private final Stock previousStock;
+    private int quantity;
 
     public Stock(int quantity) {
         if (quantity < 0) {
             throw new NotEnoughStockException("재고 수량이 부족합니다.");
         }
         this.quantity = quantity;
-        this.previousStock = null;
     }
 
-    private Stock(int quantity, Stock previousStock) {
-        if (quantity < 0) {
-            throw new NotEnoughStockException("재고 수량이 부족합니다.");
-        }
-        this.quantity = quantity;
-        this.previousStock = previousStock;
+    protected Stock() {
+        // JPA용 기본 생성자
     }
 
     public Stock add(Stock other) {
-        return new Stock(this.quantity + other.quantity, this);
+        return new Stock(this.quantity + other.quantity);
     }
 
     public Stock reduce(Stock other) {
@@ -35,14 +31,7 @@ public class Stock {
         if (restQuantity < 0) {
             throw new NotEnoughStockException("차감 후 수량은 0 이상이어야 합니다.");
         }
-        return new Stock(restQuantity, this);
-    }
-
-    public Stock rollback() {
-        if (this.previousStock == null) {
-            return this;
-        }
-        return this.previousStock;
+        return new Stock(restQuantity);
     }
 
     @Override

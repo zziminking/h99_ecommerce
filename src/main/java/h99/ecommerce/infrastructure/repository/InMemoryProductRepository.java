@@ -7,18 +7,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
 @Repository
+@Profile("test")
 public class InMemoryProductRepository implements ProductRepository {
 
-    private final Map<Integer, Product> store = new ConcurrentHashMap<>();
-    private final AtomicInteger idGenerator = new AtomicInteger(1);
-
-    @Override
-    public int generateId() {
-        return idGenerator.getAndIncrement();
-    }
+    private final Map<Long, Product> store = new ConcurrentHashMap<>();
 
     @Override
     public Product save(Product product) {
@@ -27,7 +23,7 @@ public class InMemoryProductRepository implements ProductRepository {
     }
 
     @Override
-    public Product findOne(int productId) {
+    public Product findOne(Long productId) {
         return store.get(productId);
     }
 
@@ -37,12 +33,11 @@ public class InMemoryProductRepository implements ProductRepository {
     }
 
     @Override
-    public void delete(int productId) {
+    public void delete(Long productId) {
         store.remove(productId);
     }
 
     public void clear() {
         store.clear();
-        idGenerator.set(1);
     }
 }

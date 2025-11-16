@@ -1,23 +1,43 @@
 package h99.ecommerce.domain;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.Builder;
 import lombok.Getter;
 
+@Entity
+@Table(name = "cart_item")
 @Getter
 @Builder
 public class CartItem {
 
-    private int cartItemId;
-    private int userId;
-    private int productId;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "cart_item_id")
+    private Long cartItemId;
+
+    @Column(name = "user_id")
+    private Long userId;
+
+    @Column(name = "product_id")
+    private Long productId;
+
+    @Column(name = "quantity")
     private int quantity;
 
-    public CartItem(int cartItemId, int userId, int productId, int quantity) {
+    public CartItem(Long cartItemId, Long userId, Long productId, int quantity) {
         validateQuantity(quantity);
         this.cartItemId = cartItemId;
         this.userId = userId;
         this.productId = productId;
         this.quantity = quantity;
+    }
+
+    public CartItem() {
     }
 
     public void updateQuantity(int newQuantity) {

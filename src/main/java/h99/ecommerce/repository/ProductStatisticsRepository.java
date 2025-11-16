@@ -8,21 +8,19 @@ import java.util.Optional;
 
 public interface ProductStatisticsRepository {
 
-    int generateId();
-
     ProductStatistics save(ProductStatistics statistics);
 
-    ProductStatistics findOne(int statisticsId);
+    ProductStatistics findOne(Long statisticsId);
 
     /**
      * 특정 날짜의 상품 통계 조회
      */
-    Optional<ProductStatistics> findByProductIdAndDate(int productId, LocalDate date);
+    Optional<ProductStatistics> findByProductIdAndDate(Long productId, LocalDate date);
 
     /**
      * 특정 기간 내의 상품 통계 조회
      */
-    List<ProductStatistics> findByProductIdAndDateBetween(int productId, LocalDate startDate, LocalDate endDate);
+    List<ProductStatistics> findByProductIdAndDateBetween(Long productId, LocalDate startDate, LocalDate endDate);
 
     /**
      * 특정 기간 내의 모든 통계 조회

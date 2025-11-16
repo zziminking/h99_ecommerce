@@ -7,46 +7,55 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
 @Repository
+@Profile("test")
 public class InMemoryCartItemRepository implements CartItemRepository {
 
-    private final Map<Integer, CartItem> store = new ConcurrentHashMap<>();
+    private final Map<Long, CartItem> store = new ConcurrentHashMap<>();
     private final AtomicInteger idGenerator = new AtomicInteger(1);
 
     @Override
-    public int generateId() {
-        return idGenerator.getAndIncrement();
-    }
-
-    @Override
     public CartItem save(CartItem cartItem) {
+        // ID가 없으면 새로 생성 (JPA의 GeneratedValue 동작 모방)
+        if (cartItem.getCartItemId() == null) {
+            Long newId = (long) idGenerator.getAndIncrement();
+            CartItem newCartItem = new CartItem(
+                    newId,
+                    cartItem.getUserId(),
+                    cartItem.getProductId(),
+                    cartItem.getQuantity()
+            );
+            store.put(newId, newCartItem);
+            return newCartItem;
+        }
         store.put(cartItem.getCartItemId(), cartItem);
         return cartItem;
     }
 
     @Override
-    public CartItem findOne(int cartItemId) {
+    public CartItem findOne(Long cartItemId) {
         return store.get(cartItemId);
     }
 
     @Override
-    public List<CartItem> findByUserId(int userId) {
+    public List<CartItem> findByUserId(Long userId) {
         return store.values().stream()
-                .filter(cartItem -> cartItem.getUserId() == userId)
+                .filter(cartItem -> cartItem.getUserId().equals(userId))
                 .toList();
     }
 
     @Override
-    public Optional<CartItem> findByUserIdAndProductId(int userId, int productId) {
+    public Optional<CartItem> findByUserIdAndProductId(Long userId, Long productId) {
         return store.values().stream()
-                .filter(cartItem -> cartItem.getUserId() == userId && cartItem.getProductId() == productId)
+                .filter(cartItem -> cartItem.getUserId().equals(userId) && cartItem.getProductId().equals(productId))
                 .findFirst();
     }
 
     @Override
-    public void updateQuantity(int cartItemId, int newQuantity) {
+    public void updateQuantity(Long cartItemId, int newQuantity) {
         CartItem cartItem = store.get(cartItemId);
         if (cartItem != null) {
             cartItem.updateQuantity(newQuantity);
@@ -54,7 +63,7 @@ public class InMemoryCartItemRepository implements CartItemRepository {
     }
 
     @Override
-    public void delete(int cartItemId) {
+    public void delete(Long cartItemId) {
         store.remove(cartItemId);
     }
 

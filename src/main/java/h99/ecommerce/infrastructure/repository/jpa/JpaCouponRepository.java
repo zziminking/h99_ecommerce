@@ -1,0 +1,39 @@
+package h99.ecommerce.infrastructure.repository.jpa;
+
+import h99.ecommerce.domain.Coupon;
+import h99.ecommerce.repository.CouponRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Profile;
+import org.springframework.stereotype.Repository;
+
+@Repository
+@Profile("!test")
+@RequiredArgsConstructor
+public class JpaCouponRepository implements CouponRepository {
+
+    @PersistenceContext
+    private final EntityManager em;
+
+    @Override
+    public Coupon save(Coupon coupon) {
+        if (coupon.getCouponId() == null) {
+            em.persist(coupon);
+            return coupon;
+        } else {
+            return em.merge(coupon);
+        }
+    }
+
+    @Override
+    public Coupon findOne(Long couponId) {
+        return em.find(Coupon.class, couponId);
+    }
+
+    @Override
+    public List<Coupon> findAll() {
+        return em.createQuery("SELECT c FROM Coupon c", Coupon.class).getResultList();
+    }
+}

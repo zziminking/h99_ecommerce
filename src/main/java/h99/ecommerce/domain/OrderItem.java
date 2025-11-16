@@ -1,35 +1,71 @@
 package h99.ecommerce.domain;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import lombok.Builder;
 import lombok.Getter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+@Entity
+@Table(name = "order_item")
 @Getter
 @Builder
 public class OrderItem {
 
-    private int orderItemId;
-    private int orderId;
-    private int productId;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "order_item_id")
+    private Long orderItemId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_id")
+    private Order order;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id")
+    private Product product;
+
+    @Column(name = "quantity")
     private int quantity;
+
+    @Column(name = "status")
     private OrderStatus status;
+
+    @Column(name = "total_amount")
     private BigDecimal totalAmount;    // 상품 가격 * 수량
+
+    @Column(name = "discount_amount")
     private BigDecimal discountAmount; // 할인 금액
+
+    @Column(name = "final_amount")
     private BigDecimal finalAmount;    // 최종 금액 (totalAmount - discountAmount)
+
+    @Column(name = "price")
     private BigDecimal price;          // 상품 단가
+
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
+
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    public OrderItem(int orderItemId, int orderId, int productId, int quantity, OrderStatus status,
+    public OrderItem(Long orderItemId, Order order, Product product, int quantity, OrderStatus status,
                      BigDecimal totalAmount, BigDecimal discountAmount, BigDecimal finalAmount,
                      BigDecimal price, LocalDateTime createdAt, LocalDateTime updatedAt) {
         validateQuantity(quantity);
         validatePrice(price);
         this.orderItemId = orderItemId;
-        this.orderId = orderId;
-        this.productId = productId;
+        this.order = order;
+        this.product = product;
         this.quantity = quantity;
         this.status = status == null ? OrderStatus.PENDING : status;
         this.totalAmount = totalAmount == null ? BigDecimal.ZERO : totalAmount;
@@ -38,6 +74,10 @@ public class OrderItem {
         this.price = price;
         this.createdAt = createdAt == null ? LocalDateTime.now() : createdAt;
         this.updatedAt = updatedAt == null ? LocalDateTime.now() : updatedAt;
+    }
+
+    public OrderItem() {
+
     }
 
     private void validateQuantity(int quantity) {
@@ -112,5 +152,13 @@ public class OrderItem {
      */
     public boolean isPending() {
         return this.status == OrderStatus.PENDING;
+    }
+
+    public Long getOrderId() {
+        return order != null ? order.getOrderId() : null;
+    }
+
+    public Long getProductId() {
+        return product != null ? product.getProductId() : null;
     }
 }

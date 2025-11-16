@@ -12,8 +12,8 @@ import lombok.NoArgsConstructor;
 public class CouponIssueRequest {
     
     @Schema(description = "사용자 ID", example = "1", required = true)
-    private Integer userId;
-    
+    private Long userId;
+
     @Schema(description = "쿠폰 ID", example = "1", required = true)
-    private Integer couponId;
+    private Long couponId;
 }

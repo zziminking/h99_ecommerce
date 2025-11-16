@@ -1,16 +1,17 @@
 package h99.ecommerce.request;
 
-import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Data
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "장바구니 수량 수정 요청")
 public class CartUpdateRequest {
-    
-    @Schema(description = "수량", example = "3", required = true)
+
+    @NotNull
+    @Positive
     private Integer quantity;
 }

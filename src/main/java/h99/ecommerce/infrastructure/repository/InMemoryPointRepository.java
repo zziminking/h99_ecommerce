@@ -2,6 +2,7 @@ package h99.ecommerce.infrastructure.repository;
 
 import h99.ecommerce.domain.Point;
 import h99.ecommerce.repository.PointRepository;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -10,15 +11,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Repository
+@Profile("test")
 public class InMemoryPointRepository implements PointRepository {
 
-    private final Map<Integer, Point> store = new ConcurrentHashMap<>();
-    private final AtomicInteger idGenerator = new AtomicInteger(1);
-
-    @Override
-    public int generateId() {
-        return idGenerator.getAndIncrement();
-    }
+    private final Map<Long, Point> store = new ConcurrentHashMap<>();
 
     @Override
     public Point save(Point point) {
@@ -31,7 +27,7 @@ public class InMemoryPointRepository implements PointRepository {
 
     @Override
     public Point findOne(int pointId) {
-        return store.get(pointId);
+        return store.get((long) pointId);
     }
 
     @Override

@@ -7,13 +7,11 @@ import java.util.Optional;
 
 public interface UserCouponRepository {
 
-    int generateId();
-
     UserCoupon save(UserCoupon userCoupon);
 
-    UserCoupon findOne(int userCouponId);
+    UserCoupon findOne(Long userCouponId);
 
-    List<UserCoupon> findByUserId(int userId);
+    List<UserCoupon> findByUserId(Long userId);
 
-    Optional<UserCoupon> findByUserIdAndCouponId(int userId, int couponId);
+    Optional<UserCoupon> findByUserIdAndCouponId(Long userId, Long couponId);
 }

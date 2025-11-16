@@ -11,22 +11,24 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class OrderTest {
 
+    private User user;
     private Order order;
+    private Product product;
     private OrderItem orderItem1;
     private OrderItem orderItem2;
 
     @BeforeEach
     void setUp() {
-        order = new Order(1, 100, 0, BigDecimal.ZERO, null, null, null, new ArrayList<>());
+        order = new Order(1L, user, 0, BigDecimal.ZERO, null, null, null, new ArrayList<>());
         
         orderItem1 = new OrderItem(
-                1, 1, 1, 3, OrderStatus.PENDING,
+                1L, order, product, 3, OrderStatus.PENDING,
                 new BigDecimal("30000"), BigDecimal.ZERO, new BigDecimal("30000"),
                 new BigDecimal("10000"), null, null
         );
         
         orderItem2 = new OrderItem(
-                2, 1, 2, 2, OrderStatus.PENDING,
+                2L, order, product, 2, OrderStatus.PENDING,
                 new BigDecimal("40000"), BigDecimal.ZERO, new BigDecimal("40000"),
                 new BigDecimal("20000"), null, null
         );
@@ -36,11 +38,11 @@ public class OrderTest {
     @DisplayName("주문 생성 - 성공")
     void create_order_success() {
         // given & when
-        Order newOrder = new Order(2, 200, 0, null, null, null, null, null);
+        Order newOrder = new Order(2L, user, 0, null, null, null, null, null);
 
         // then
         assertEquals(2, newOrder.getOrderId());
-        assertEquals(200, newOrder.getUserId());
+        assertEquals(200, newOrder.getUser());
         assertEquals(BigDecimal.ZERO, newOrder.getTotalPrice());
         assertNotNull(newOrder.getOrderAt());
         assertNotNull(newOrder.getCreatedAt());

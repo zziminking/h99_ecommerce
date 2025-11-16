@@ -13,9 +13,9 @@ import java.util.List;
 @Schema(description = "주문 생성 요청")
 public class OrderCreateRequest {
     
-    private Integer userId;
+    private Long userId;
     private List<OrderItemRequest> orderItems;
-    
+
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
@@ -23,7 +23,7 @@ public class OrderCreateRequest {
     public static class OrderItemRequest {
 
         @Schema(description = "상품 ID", example = "1", required = true)
-        private Integer productId;
+        private Long productId;
 
         @Schema(description = "사용자 ID", example = "1", required = true)
         private Integer quantity;

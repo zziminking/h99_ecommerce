@@ -32,7 +32,7 @@ public class ProductController {
      */
     @GetMapping("/{productId}")
     public ResponseEntity<Product> getProduct(
-            @PathVariable Integer productId
+            @PathVariable Long productId
     ) {
         if (productId == null || productId <= 0) {
             return ResponseEntity.badRequest().build();
@@ -47,7 +47,7 @@ public class ProductController {
      */
     @GetMapping("/{productId}/stock")
     public ResponseEntity<Boolean> checkStockAvailable(
-            @PathVariable Integer productId
+            @PathVariable Long productId
     ) {
         if (productId == null || productId <= 0) {
             return ResponseEntity.badRequest().build();
@@ -62,7 +62,7 @@ public class ProductController {
      */
     @GetMapping("/{productId}/stock/check")
     public ResponseEntity<Boolean> checkStockEnough(
-            @PathVariable Integer productId,
+            @PathVariable Long productId,
             @RequestParam Integer quantity
     ) {
         if (productId == null || productId <= 0) {

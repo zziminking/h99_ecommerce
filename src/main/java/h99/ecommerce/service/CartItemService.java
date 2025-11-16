@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -20,7 +21,7 @@ public class CartItemService {
     private final CartItemRepository cartItemRepository;
     private final ProductRepository productRepository;
 
-    public List<CartItemDto> getCart(int userId) {
+    public List<CartItemDto> getCart(Long userId) {
         List<CartItem> cartItems = cartItemRepository.findByUserId(userId);
         List<CartItemDto> cartItemDtoList = new ArrayList<>();
         for (CartItem cartItem : cartItems) {
@@ -40,6 +41,7 @@ public class CartItemService {
         return cartItemDtoList;
     }
 
+    @Transactional
     public void addCartItem(CartAddRequest request) {
         Product product = productRepository.findOne(request.getProductId());
         if (product == null) {
@@ -72,18 +74,16 @@ public class CartItemService {
                 throw new NotEnoughStockException("재고가 부족합니다. 현재 재고: " + product.getStock().getQuantity());
             }
 
-            int cartItemId = cartItemRepository.generateId();
-            CartItem newCartItem = new CartItem(
-                    cartItemId,
-                    request.getUserId(),
-                    request.getProductId(),
-                    request.getQuantity()
-            );
+            CartItem newCartItem = CartItem.builder()
+                    .userId(request.getUserId())
+                    .productId(request.getProductId())
+                    .quantity(request.getQuantity())
+                    .build();
             cartItemRepository.save(newCartItem);
         }
     }
 
-    public void updateCartItemQuantity(int cartItemId, int newQuantity) {
+    public void updateCartItemQuantity(Long cartItemId, int newQuantity) {
         CartItem cartItem = cartItemRepository.findOne(cartItemId);
         if (cartItem == null) {
             throw new IllegalArgumentException("장바구니 아이템을 찾을 수 없습니다.");
@@ -105,7 +105,7 @@ public class CartItemService {
         cartItemRepository.updateQuantity(cartItemId, newQuantity);
     }
 
-    public void removeCartItem(int cartItemId) {
+    public void removeCartItem(Long cartItemId) {
         CartItem cartItem = cartItemRepository.findOne(cartItemId);
         if (cartItem == null) {
             throw new IllegalArgumentException("장바구니 아이템을 찾을 수 없습니다.");
@@ -114,7 +114,7 @@ public class CartItemService {
         cartItemRepository.delete(cartItemId);
     }
 
-    public java.math.BigDecimal getCartTotal(int userId) {
+    public java.math.BigDecimal getCartTotal(Long userId) {
         List<CartItemDto> cart = getCart(userId);
         return cart.stream()
                 .map(CartItemDto::getTotalAmount)

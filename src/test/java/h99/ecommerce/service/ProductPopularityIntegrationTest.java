@@ -29,7 +29,7 @@ class ProductPopularityIntegrationTest {
         productService = new ProductService(productRepository, statisticsRepository);
 
         // 테스트용 상품 10개 생성
-        for (int i = 1; i <= 10; i++) {
+        for (Long i = 1L; i <= 10; i++) {
             Product product = Product.builder()
                     .productId(i)
                     .name("상품 " + i)
@@ -46,13 +46,13 @@ class ProductPopularityIntegrationTest {
     @DisplayName("상품 조회 시 일별 조회수 통계가 업데이트되어야 함")
     void product_view_should_update_daily_statistics() {
         // When: 상품 1번을 5번 조회
-        for (int i = 0; i < 5; i++) {
-            productService.getProduct(1);
+        for (Long i = 0L; i < 5; i++) {
+            productService.getProduct(1L);
         }
 
         // Then: 오늘 날짜의 상품 1번 조회수 통계가 5여야 함
         LocalDate today = LocalDate.now();
-        ProductStatistics stats = statisticsRepository.findByProductIdAndDate(1, today).orElse(null);
+        ProductStatistics stats = statisticsRepository.findByProductIdAndDate(1L, today).orElse(null);
 
         assertNotNull(stats, "통계가 생성되어야 함");
         assertEquals(1, stats.getProductId());
@@ -65,11 +65,11 @@ class ProductPopularityIntegrationTest {
     @DisplayName("주문 시 일별 주문 수량 통계가 업데이트되어야 함")
     void order_should_update_daily_statistics() {
         // When: 상품 1번을 3개 주문
-        productService.updateOrderStatistics(1, 3);
+        productService.updateOrderStatistics(1L, 3);
 
         // Then: 오늘 날짜의 상품 1번 주문 수량 통계가 3이어야 함
         LocalDate today = LocalDate.now();
-        ProductStatistics stats = statisticsRepository.findByProductIdAndDate(1, today).orElse(null);
+        ProductStatistics stats = statisticsRepository.findByProductIdAndDate(1L, today).orElse(null);
 
         assertNotNull(stats, "통계가 생성되어야 함");
         assertEquals(1, stats.getProductId());
@@ -226,10 +226,8 @@ class ProductPopularityIntegrationTest {
      * 테스트용 통계 생성 헬퍼 메서드
      */
     private void createStatistics(int productId, LocalDate date, int viewCount, int orderCount) {
-        int statsId = statisticsRepository.generateId();
         ProductStatistics stats = ProductStatistics.builder()
-                .statisticsId(statsId)
-                .productId(productId)
+                .productId((long) productId)
                 .statisticsDate(date)
                 .viewCount(viewCount)
                 .orderCount(orderCount)

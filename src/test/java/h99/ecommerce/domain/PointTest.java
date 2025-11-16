@@ -13,7 +13,7 @@ public class PointTest {
     @DisplayName("포인트 내역 생성 - 충전 (양수)")
     void create_point_charge_success() {
         // given & when
-        Point point = new Point(1, 0, 100, new BigDecimal("5000"), null);
+        Point point = new Point(1L, 0L, 100L, new BigDecimal("5000"), null);
 
         // then
         assertEquals(1, point.getPointId());
@@ -27,7 +27,7 @@ public class PointTest {
     @DisplayName("포인트 내역 생성 - 사용 (음수)")
     void create_point_usage_success() {
         // given & when
-        Point point = new Point(1, 100, 100, new BigDecimal("-3000"), null);
+        Point point = new Point(1L, 100L, 100L, new BigDecimal("-3000"), null);
 
         // then
         assertEquals(1, point.getPointId());
@@ -42,7 +42,7 @@ public class PointTest {
     void create_point_with_null_amount_fail() {
         // when & then
         assertThrows(IllegalArgumentException.class, () ->
-                new Point(1, 100, 100, null, null)
+                new Point(1L, 100L, 100L, null, null)
         );
     }
 
@@ -50,7 +50,7 @@ public class PointTest {
     @DisplayName("충전 내역 확인 - true (양수)")
     void is_charge_true() {
         // given
-        Point point = new Point(1, 0, 100, new BigDecimal("5000"), null);
+        Point point = new Point(1L, 0L, 100L, new BigDecimal("5000"), null);
 
         // when
         boolean result = point.isCharge();
@@ -63,7 +63,7 @@ public class PointTest {
     @DisplayName("충전 내역 확인 - false (음수)")
     void is_charge_false() {
         // given
-        Point point = new Point(1, 100, 100, new BigDecimal("-3000"), null);
+        Point point = new Point(1L, 100L, 100L, new BigDecimal("-3000"), null);
 
         // when
         boolean result = point.isCharge();
@@ -76,7 +76,7 @@ public class PointTest {
     @DisplayName("충전 내역 확인 - false (0)")
     void is_charge_false_zero() {
         // given
-        Point point = new Point(1, 0, 100, BigDecimal.ZERO, null);
+        Point point = new Point(1L, 0L, 100L, BigDecimal.ZERO, null);
 
         // when
         boolean result = point.isCharge();
@@ -89,7 +89,7 @@ public class PointTest {
     @DisplayName("사용 내역 확인 - true (음수)")
     void is_usage_true() {
         // given
-        Point point = new Point(1, 100, 100, new BigDecimal("-3000"), null);
+        Point point = new Point(1L, 100L, 100L, new BigDecimal("-3000"), null);
 
         // when
         boolean result = point.isUsage();
@@ -102,7 +102,7 @@ public class PointTest {
     @DisplayName("사용 내역 확인 - false (양수)")
     void is_usage_false() {
         // given
-        Point point = new Point(1, 0, 100, new BigDecimal("5000"), null);
+        Point point = new Point(1L, 0L, 100L, new BigDecimal("5000"), null);
 
         // when
         boolean result = point.isUsage();
@@ -115,7 +115,7 @@ public class PointTest {
     @DisplayName("사용 내역 확인 - false (0)")
     void is_usage_false_zero() {
         // given
-        Point point = new Point(1, 0, 100, BigDecimal.ZERO, null);
+        Point point = new Point(1L, 0L, 100L, BigDecimal.ZERO, null);
 
         // when
         boolean result = point.isUsage();

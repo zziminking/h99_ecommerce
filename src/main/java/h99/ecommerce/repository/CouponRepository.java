@@ -6,11 +6,9 @@ import java.util.List;
 
 public interface CouponRepository {
 
-    int generateId();
-
     Coupon save(Coupon coupon);
 
-    Coupon findOne(int couponId);
+    Coupon findOne(Long couponId);
 
     List<Coupon> findAll();
 }

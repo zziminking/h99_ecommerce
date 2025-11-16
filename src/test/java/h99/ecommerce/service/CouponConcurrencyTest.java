@@ -1,35 +1,36 @@
 package h99.ecommerce.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import h99.ecommerce.domain.Coupon;
 import h99.ecommerce.domain.CouponStatus;
 import h99.ecommerce.domain.DiscountType;
-import h99.ecommerce.domain.UserCoupon;
 import h99.ecommerce.infrastructure.repository.InMemoryCouponRepository;
 import h99.ecommerce.infrastructure.repository.InMemoryUserCouponRepository;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-
+import h99.ecommerce.infrastructure.repository.InMemoryUserRepository;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 public class CouponConcurrencyTest {
 
     private CouponService couponService;
     private InMemoryCouponRepository couponRepository;
     private InMemoryUserCouponRepository userCouponRepository;
+    private InMemoryUserRepository userRepository;
 
     @BeforeEach
     void setUp() {
         couponRepository = new InMemoryCouponRepository();
         userCouponRepository = new InMemoryUserCouponRepository();
-        couponService = new CouponService(couponRepository, userCouponRepository);
+        userRepository = new InMemoryUserRepository();
+        couponService = new CouponService(couponRepository, userCouponRepository, userRepository);
     }
 
     @Test
@@ -38,7 +39,7 @@ public class CouponConcurrencyTest {
         // Given: 최대 100장 발급 가능한 쿠폰 생성
         LocalDateTime now = LocalDateTime.now();
         Coupon coupon = new Coupon(
-                1,
+                1L,
                 "선착순 100명 쿠폰",
                 DiscountType.FIXED,
                 new BigDecimal("5000"),
@@ -52,8 +53,18 @@ public class CouponConcurrencyTest {
         );
         couponRepository.save(coupon);
 
-        // When: 200명이 동시에 쿠폰 발급 시도
+        // Create users for testing
         int threadCount = 200;
+        for (int i = 0; i < threadCount; i++) {
+            h99.ecommerce.domain.User user = h99.ecommerce.domain.User.builder()
+                    .userId((long) (i + 1))
+                    .username("user" + (i + 1))
+                    .point(new BigDecimal("10000"))
+                    .build();
+            userRepository.save(user);
+        }
+
+        // When: 200명이 동시에 쿠폰 발급 시도
         ExecutorService executorService = Executors.newFixedThreadPool(32);
         CountDownLatch latch = new CountDownLatch(threadCount);
 
@@ -61,10 +72,10 @@ public class CouponConcurrencyTest {
         AtomicInteger failCount = new AtomicInteger(0);
 
         for (int i = 0; i < threadCount; i++) {
-            final int userId = i + 1;
+            final Long userId = i + 1L;
             executorService.submit(() -> {
                 try {
-                    couponService.issueCoupon(userId, 1);
+                    couponService.issueCoupon(userId, 1L);
                     successCount.incrementAndGet();
                 } catch (Exception e) {
                     failCount.incrementAndGet();
@@ -81,7 +92,7 @@ public class CouponConcurrencyTest {
         System.out.println("성공: " + successCount.get());
         System.out.println("실패: " + failCount.get());
 
-        Coupon finalCoupon = couponRepository.findOne(1);
+        Coupon finalCoupon = couponRepository.findOne(1L);
         System.out.println("최종 발급 수량: " + finalCoupon.getIssuedCount());
 
         assertEquals(100, successCount.get(), "성공 횟수는 100이어야 합니다");
@@ -95,7 +106,7 @@ public class CouponConcurrencyTest {
         // Given: 최대 100장 발급 가능한 쿠폰 생성
         LocalDateTime now = LocalDateTime.now();
         Coupon coupon = new Coupon(
-                1,
+                1L,
                 "선착순 100명 쿠폰",
                 DiscountType.PERCENTAGE,
                 new BigDecimal("10"),
@@ -109,8 +120,18 @@ public class CouponConcurrencyTest {
         );
         couponRepository.save(coupon);
 
-        // When: 1000명이 동시에 쿠폰 발급 시도
+        // Create users for testing
         int threadCount = 1000;
+        for (int i = 0; i < threadCount; i++) {
+            h99.ecommerce.domain.User user = h99.ecommerce.domain.User.builder()
+                    .userId((long) (i + 1))
+                    .username("user" + (i + 1))
+                    .point(new BigDecimal("10000"))
+                    .build();
+            userRepository.save(user);
+        }
+
+        // When: 1000명이 동시에 쿠폰 발급 시도
         ExecutorService executorService = Executors.newFixedThreadPool(50);
         CountDownLatch latch = new CountDownLatch(threadCount);
 
@@ -118,10 +139,10 @@ public class CouponConcurrencyTest {
         AtomicInteger failCount = new AtomicInteger(0);
 
         for (int i = 0; i < threadCount; i++) {
-            final int userId = i + 1;
+            final Long userId = i + 1L;
             executorService.submit(() -> {
                 try {
-                    couponService.issueCoupon(userId, 1);
+                    couponService.issueCoupon(userId, 1L);
                     successCount.incrementAndGet();
                 } catch (Exception e) {
                     failCount.incrementAndGet();
@@ -138,7 +159,7 @@ public class CouponConcurrencyTest {
         System.out.println("성공: " + successCount.get());
         System.out.println("실패: " + failCount.get());
 
-        Coupon finalCoupon = couponRepository.findOne(1);
+        Coupon finalCoupon = couponRepository.findOne(1L);
         System.out.println("최종 발급 수량: " + finalCoupon.getIssuedCount());
 
         assertEquals(100, successCount.get(), "성공 횟수는 100이어야 합니다");
@@ -152,7 +173,7 @@ public class CouponConcurrencyTest {
         // Given: 최대 100장 발급 가능한 쿠폰 생성
         LocalDateTime now = LocalDateTime.now();
         Coupon coupon = new Coupon(
-                1,
+                1L,
                 "선착순 100명 쿠폰",
                 DiscountType.FIXED,
                 new BigDecimal("3000"),
@@ -166,6 +187,14 @@ public class CouponConcurrencyTest {
         );
         couponRepository.save(coupon);
 
+        // Create user for testing
+        h99.ecommerce.domain.User user = h99.ecommerce.domain.User.builder()
+                .userId(1L)
+                .username("user1")
+                .point(new BigDecimal("10000"))
+                .build();
+        userRepository.save(user);
+
         // When: 같은 사용자(userId=1)가 100번 동시 발급 시도
         int threadCount = 100;
         ExecutorService executorService = Executors.newFixedThreadPool(20);
@@ -177,7 +206,7 @@ public class CouponConcurrencyTest {
         for (int i = 0; i < threadCount; i++) {
             executorService.submit(() -> {
                 try {
-                    couponService.issueCoupon(1, 1); // 모두 userId=1
+                    couponService.issueCoupon(1L, 1L); // 모두 userId=1
                     successCount.incrementAndGet();
                 } catch (Exception e) {
                     failCount.incrementAndGet();
@@ -194,7 +223,7 @@ public class CouponConcurrencyTest {
         System.out.println("성공: " + successCount.get());
         System.out.println("실패: " + failCount.get());
 
-        Coupon finalCoupon = couponRepository.findOne(1);
+        Coupon finalCoupon = couponRepository.findOne(1L);
         System.out.println("최종 발급 수량: " + finalCoupon.getIssuedCount());
 
         assertEquals(1, successCount.get(), "같은 사용자는 1번만 성공해야 합니다");
@@ -208,7 +237,7 @@ public class CouponConcurrencyTest {
         // Given: 최대 10장만 발급 가능한 쿠폰
         LocalDateTime now = LocalDateTime.now();
         Coupon coupon = new Coupon(
-                1,
+                1L,
                 "선착순 10명 쿠폰",
                 DiscountType.FIXED,
                 new BigDecimal("1000"),
@@ -222,8 +251,18 @@ public class CouponConcurrencyTest {
         );
         couponRepository.save(coupon);
 
-        // When: 50명이 동시에 쿠폰 발급 시도
+        // Create users for testing
         int threadCount = 50;
+        for (int i = 0; i < threadCount; i++) {
+            h99.ecommerce.domain.User user = h99.ecommerce.domain.User.builder()
+                    .userId((long) (i + 1))
+                    .username("user" + (i + 1))
+                    .point(new BigDecimal("10000"))
+                    .build();
+            userRepository.save(user);
+        }
+
+        // When: 50명이 동시에 쿠폰 발급 시도
         ExecutorService executorService = Executors.newFixedThreadPool(10);
         CountDownLatch latch = new CountDownLatch(threadCount);
 
@@ -231,10 +270,10 @@ public class CouponConcurrencyTest {
         AtomicInteger failCount = new AtomicInteger(0);
 
         for (int i = 0; i < threadCount; i++) {
-            final int userId = i + 1;
+            final Long userId = i + 1L;
             executorService.submit(() -> {
                 try {
-                    couponService.issueCoupon(userId, 1);
+                    couponService.issueCoupon(userId, 1L);
                     successCount.incrementAndGet();
                 } catch (Exception e) {
                     failCount.incrementAndGet();
@@ -251,7 +290,7 @@ public class CouponConcurrencyTest {
         System.out.println("성공: " + successCount.get());
         System.out.println("실패: " + failCount.get());
 
-        Coupon finalCoupon = couponRepository.findOne(1);
+        Coupon finalCoupon = couponRepository.findOne(1L);
         System.out.println("최종 발급 수량: " + finalCoupon.getIssuedCount());
 
         assertEquals(10, successCount.get(), "성공 횟수는 10이어야 합니다");

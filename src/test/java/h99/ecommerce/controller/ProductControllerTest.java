@@ -38,8 +38,8 @@ class ProductControllerTest {
     void getProducts_Success() throws Exception {
         // given
         List<Product> products = Arrays.asList(
-                new Product(1, "상품1", "설명1", new BigDecimal("10000"), new Stock(10), 0, LocalDateTime.now(), LocalDateTime.now()),
-                new Product(2, "상품2", "설명2", new BigDecimal("20000"), new Stock(20), 0, LocalDateTime.now(), LocalDateTime.now())
+                new Product(1L, "상품1", "설명1", new BigDecimal("10000"), new Stock(10), 0, LocalDateTime.now(), LocalDateTime.now()),
+                new Product(2L, "상품2", "설명2", new BigDecimal("20000"), new Stock(20), 0, LocalDateTime.now(), LocalDateTime.now())
         );
         given(productService.getAllProducts()).willReturn(products);
 
@@ -58,8 +58,8 @@ class ProductControllerTest {
     @DisplayName("상품 상세 조회 API 성공")
     void getProduct_Success() throws Exception {
         // given
-        Product product = new Product(1, "상품1", "설명1", new BigDecimal("10000"), new Stock(10), 0, LocalDateTime.now(), LocalDateTime.now());
-        given(productService.getProduct(1)).willReturn(product);
+        Product product = new Product(1L, "상품1", "설명1", new BigDecimal("10000"), new Stock(10), 0, LocalDateTime.now(), LocalDateTime.now());
+        given(productService.getProduct(1L)).willReturn(product);
 
         // when & then
         mockMvc.perform(get("/api/products/1"))
@@ -84,7 +84,7 @@ class ProductControllerTest {
     @DisplayName("상품 재고 확인 API 성공")
     void checkStockAvailable_Success() throws Exception {
         // given
-        given(productService.checkStockAvailable(1)).willReturn(true);
+        given(productService.checkStockAvailable(1L)).willReturn(true);
 
         // when & then
         mockMvc.perform(get("/api/products/1/stock"))
@@ -96,7 +96,7 @@ class ProductControllerTest {
     @DisplayName("상품 재고 확인 API - 재고 없음")
     void checkStockAvailable_NoStock() throws Exception {
         // given
-        given(productService.checkStockAvailable(1)).willReturn(false);
+        given(productService.checkStockAvailable(1L)).willReturn(false);
 
         // when & then
         mockMvc.perform(get("/api/products/1/stock"))
@@ -108,7 +108,7 @@ class ProductControllerTest {
     @DisplayName("상품 재고 충분 여부 확인 API 성공")
     void checkStockEnough_Success() throws Exception {
         // given
-        given(productService.checkStockEnough(1, 5)).willReturn(true);
+        given(productService.checkStockEnough(1L, 5)).willReturn(true);
 
         // when & then
         mockMvc.perform(get("/api/products/1/stock/check")
@@ -121,7 +121,7 @@ class ProductControllerTest {
     @DisplayName("상품 재고 충분 여부 확인 API - 재고 부족")
     void checkStockEnough_NotEnough() throws Exception {
         // given
-        given(productService.checkStockEnough(1, 100)).willReturn(false);
+        given(productService.checkStockEnough(1L, 100)).willReturn(false);
 
         // when & then
         mockMvc.perform(get("/api/products/1/stock/check")
@@ -149,8 +149,8 @@ class ProductControllerTest {
     void getPopularProductsByViewCount_Success() throws Exception {
         // given
         List<Product> popularProducts = Arrays.asList(
-                new Product(1, "인기상품1", "설명1", new BigDecimal("10000"), new Stock(10), 0, LocalDateTime.now(), LocalDateTime.now()),
-                new Product(2, "인기상품2", "설명2", new BigDecimal("20000"), new Stock(20), 0, LocalDateTime.now(), LocalDateTime.now())
+                new Product(1L, "인기상품1", "설명1", new BigDecimal("10000"), new Stock(10), 0, LocalDateTime.now(), LocalDateTime.now()),
+                new Product(2L, "인기상품2", "설명2", new BigDecimal("20000"), new Stock(20), 0, LocalDateTime.now(), LocalDateTime.now())
         );
         given(productService.getPopularProductsByViewCount(5)).willReturn(popularProducts);
 
@@ -168,7 +168,7 @@ class ProductControllerTest {
     void getPopularProductsByViewCount_DefaultLimit() throws Exception {
         // given
         List<Product> popularProducts = Arrays.asList(
-                new Product(1, "인기상품1", "설명1", new BigDecimal("10000"), new Stock(10), 0, LocalDateTime.now(), LocalDateTime.now())
+                new Product(1L, "인기상품1", "설명1", new BigDecimal("10000"), new Stock(10), 0, LocalDateTime.now(), LocalDateTime.now())
         );
         given(productService.getPopularProductsByViewCount(5)).willReturn(popularProducts);
 
@@ -183,8 +183,8 @@ class ProductControllerTest {
     void getPopularProductsByOrderCount_Success() throws Exception {
         // given
         List<Product> popularProducts = Arrays.asList(
-                new Product(1, "베스트상품1", "설명1", new BigDecimal("10000"), new Stock(10), 0, LocalDateTime.now(), LocalDateTime.now()),
-                new Product(2, "베스트상품2", "설명2", new BigDecimal("20000"), new Stock(20), 0, LocalDateTime.now(), LocalDateTime.now())
+                new Product(1L, "베스트상품1", "설명1", new BigDecimal("10000"), new Stock(10), 0, LocalDateTime.now(), LocalDateTime.now()),
+                new Product(2L, "베스트상품2", "설명2", new BigDecimal("20000"), new Stock(20), 0, LocalDateTime.now(), LocalDateTime.now())
         );
         given(productService.getPopularProductsByOrderCount(5)).willReturn(popularProducts);
 
@@ -202,7 +202,7 @@ class ProductControllerTest {
     void getPopularProductsByOrderCount_DefaultLimit() throws Exception {
         // given
         List<Product> popularProducts = Arrays.asList(
-                new Product(1, "베스트상품1", "설명1", new BigDecimal("10000"), new Stock(10), 0, LocalDateTime.now(), LocalDateTime.now())
+                new Product(1L, "베스트상품1", "설명1", new BigDecimal("10000"), new Stock(10), 0, LocalDateTime.now(), LocalDateTime.now())
         );
         given(productService.getPopularProductsByOrderCount(5)).willReturn(popularProducts);
 

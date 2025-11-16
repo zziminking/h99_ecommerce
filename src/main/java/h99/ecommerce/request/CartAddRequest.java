@@ -12,11 +12,11 @@ import lombok.NoArgsConstructor;
 public class CartAddRequest {
     
     @Schema(description = "사용자 ID", example = "1", required = true)
-    private Integer userId;
-    
+    private Long userId;
+
     @Schema(description = "상품 ID", example = "1", required = true)
-    private Integer productId;
-    
+    private Long productId;
+
     @Schema(description = "수량", example = "2", required = true)
     private Integer quantity;
 }
