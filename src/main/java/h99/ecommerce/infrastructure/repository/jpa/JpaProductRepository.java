@@ -39,4 +39,16 @@ public class JpaProductRepository implements ProductRepository {
     public void delete(Long productId) {
         em.remove(em.find(Product.class, productId));
     }
+
+    @Override
+    public int deductStockConditional(Long productId, int quantity) {
+        return em.createQuery(
+                        "UPDATE Product a "
+                                + "SET a.stock.quantity = a.stock.quantity - :quantity "
+                                + "WHERE a.productId = :productId "
+                                + "AND a.stock.quantity >= :quantity")
+                .setParameter("productId", productId)
+                .setParameter("quantity", quantity)
+                .executeUpdate();
+    }
 }

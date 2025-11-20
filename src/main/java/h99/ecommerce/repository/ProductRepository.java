@@ -12,4 +12,6 @@ public interface ProductRepository {
     List<Product> findAll();
 
     void delete(Long productId);
+
+    int deductStockConditional(Long productId, int quantity);
 }
