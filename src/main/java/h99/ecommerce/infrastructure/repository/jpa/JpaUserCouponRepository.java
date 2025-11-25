@@ -7,11 +7,9 @@ import jakarta.persistence.PersistenceContext;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
 @Repository
-@Profile("!test")
 @RequiredArgsConstructor
 public class JpaUserCouponRepository implements UserCouponRepository {
 

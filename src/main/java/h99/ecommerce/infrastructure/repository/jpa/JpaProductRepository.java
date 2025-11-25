@@ -6,11 +6,9 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
 @Repository
-@Profile("!test")
 @RequiredArgsConstructor
 public class JpaProductRepository implements ProductRepository {
 
@@ -40,5 +38,17 @@ public class JpaProductRepository implements ProductRepository {
     @Override
     public void delete(Long productId) {
         em.remove(em.find(Product.class, productId));
+    }
+
+    @Override
+    public int deductStockConditional(Long productId, int quantity) {
+        return em.createQuery(
+                        "UPDATE Product a "
+                                + "SET a.stock.quantity = a.stock.quantity - :quantity "
+                                + "WHERE a.productId = :productId "
+                                + "AND a.stock.quantity >= :quantity")
+                .setParameter("productId", productId)
+                .setParameter("quantity", quantity)
+                .executeUpdate();
     }
 }

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -70,22 +71,39 @@ public class ProductService {
     /**
      * 재고 차감
      */
+    @Transactional
     public void deductStock(Long productId, int quantity) {
-        Product product = productRepository.findOne(productId);
-        if (product == null) {
-            throw new IllegalArgumentException("상품을 찾을 수 없습니다. productId: " + productId);
+        int maxAttempts = 5;
+
+        for (int attempt = 1; attempt <= maxAttempts; attempt++) {
+            int updateRows = productRepository.deductStockConditional(productId, quantity);
+
+            if (updateRows == 1) {
+                return;
+            }
+
+            Product product = productRepository.findOne(productId);
+            if (product == null) {
+                throw new IllegalArgumentException("상품을 찾을 수 없습니다. productId: " + productId);
+            }
+
+            if (product.getStock().getQuantity() < quantity) {
+                throw new NotEnoughStockException(
+                        "재고가 부족합니다. 요청수량: " + quantity +
+                                ", 현재수량: " + product.getStock().getQuantity()
+                );
+            }
+            if (attempt < maxAttempts) {
+                try {
+                    Thread.sleep(50); // 50ms 대기 후 재시도
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    throw new RuntimeException("재고 차감 재시도 중 인터럽트 발생", e);
+                }
+            }
         }
 
-        if (!product.hasStock()) {
-            throw new NotEnoughStockException("품절된 상품입니다.");
-        }
-
-        if (!product.hasEnoughStock(quantity)) {
-            throw new NotEnoughStockException("재고가 부족합니다. 현재 재고: " + product.getStock().getQuantity());
-        }
-
-        product.deductStock(quantity);
-        productRepository.save(product);
+        throw new RuntimeException("재고 차감 실패!!!");
     }
 
     /**

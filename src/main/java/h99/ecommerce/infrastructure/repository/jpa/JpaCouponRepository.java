@@ -3,14 +3,13 @@ package h99.ecommerce.infrastructure.repository.jpa;
 import h99.ecommerce.domain.Coupon;
 import h99.ecommerce.repository.CouponRepository;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
 import jakarta.persistence.PersistenceContext;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
 @Repository
-@Profile("!test")
 @RequiredArgsConstructor
 public class JpaCouponRepository implements CouponRepository {
 
@@ -36,4 +35,16 @@ public class JpaCouponRepository implements CouponRepository {
     public List<Coupon> findAll() {
         return em.createQuery("SELECT c FROM Coupon c", Coupon.class).getResultList();
     }
+
+    @Override
+    public Coupon findByIdWithLock(Long couponId) {
+        return em.createQuery(
+                        "SELECT c FROM Coupon c WHERE c.couponId = :couponId",
+                        Coupon.class)
+                .setParameter("couponId", couponId)
+                .setLockMode(LockModeType.PESSIMISTIC_WRITE)
+                .setHint("javax.persistence.lock.timeout", 3000)
+                .getSingleResult();
+    }
+
 }

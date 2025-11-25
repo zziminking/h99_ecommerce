@@ -11,4 +11,6 @@ public interface CouponRepository {
     Coupon findOne(Long couponId);
 
     List<Coupon> findAll();
+
+    Coupon findByIdWithLock(Long couponId);
 }
