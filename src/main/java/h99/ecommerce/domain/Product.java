@@ -1,5 +1,7 @@
 package h99.ecommerce.domain;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import h99.ecommerce.domain.vo.Stock;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
@@ -8,8 +10,11 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -18,6 +23,9 @@ import java.time.LocalDateTime;
 @Table(name = "products")
 @Getter
 @Builder
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
+@lombok.EqualsAndHashCode
 public class Product {
 
     @Id
@@ -46,20 +54,23 @@ public class Product {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    public Product(Long productId, String name, String description, BigDecimal price, Stock stock, int totalViewCount, LocalDateTime createdAt, LocalDateTime updatedAt) {
-        validatePrice(price);
-        this.productId = productId;
-        this.name = name;
-        this.description = description;
-        this.price = price;
-        this.stock = stock == null ? new Stock(0) : stock;
-        this.totalViewCount = totalViewCount;
-        this.createdAt = createdAt == null ? LocalDateTime.now() : createdAt;
-        this.updatedAt = updatedAt == null ? LocalDateTime.now() : updatedAt;
-    }
-
-    public Product() {
-
+    // Builder를 사용할 때 유효성 검사를 위한 내부 클래스
+    public static class ProductBuilder {
+        public Product build() {
+            if (price != null && price.compareTo(BigDecimal.ZERO) < 0) {
+                throw new IllegalArgumentException("가격은 0 이상이어야 합니다.");
+            }
+            if (stock == null) {
+                stock = new Stock(0);
+            }
+            if (createdAt == null) {
+                createdAt = LocalDateTime.now();
+            }
+            if (updatedAt == null) {
+                updatedAt = LocalDateTime.now();
+            }
+            return new Product(productId, name, description, price, stock, totalViewCount, createdAt, updatedAt);
+        }
     }
 
     private void validatePrice(BigDecimal price) {

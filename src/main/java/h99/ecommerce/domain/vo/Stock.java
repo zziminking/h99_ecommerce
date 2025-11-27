@@ -3,10 +3,13 @@ package h99.ecommerce.domain.vo;
 import h99.ecommerce.exception.NotEnoughStockException;
 import jakarta.persistence.Embeddable;
 import java.util.Objects;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Embeddable
 @Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Stock {
 
     private int quantity;
@@ -16,10 +19,6 @@ public class Stock {
             throw new NotEnoughStockException("재고 수량이 부족합니다.");
         }
         this.quantity = quantity;
-    }
-
-    protected Stock() {
-        // JPA용 기본 생성자
     }
 
     public Stock add(Stock other) {
