@@ -26,12 +26,12 @@ public class JpaPointRepository implements PointRepository {
     }
 
     @Override
-    public Point findOne(int pointId) {
+    public Point findOne(Long pointId) {
         return em.find(Point.class, pointId);
     }
 
     @Override
-    public List<Point> findByUserId(int userId) {
+    public List<Point> findByUserId(Long userId) {
         return em.createQuery("SELECT p FROM Point p WHERE p.userId = :userId", Point.class)
                 .setParameter("userId", userId)
                 .getResultList();
