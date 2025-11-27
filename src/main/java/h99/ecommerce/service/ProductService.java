@@ -8,6 +8,10 @@ import h99.ecommerce.exception.NotEnoughStockException;
 import h99.ecommerce.repository.ProductRepository;
 import h99.ecommerce.repository.ProductStatisticsRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -21,23 +25,46 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final ProductStatisticsRepository productStatisticsRepository;
 
+    private ProductService self;  // Proxy를 통한 캐시 동작을 위해 자기 자신 주입
+    
+    @Autowired
+    public void setSelf(@Lazy ProductService self) {
+        this.self = self;
+    }
+
     /**
-     * 상품 단건 조회
+     * 상품 단건 조회 (캐시 적용)
+     * 캐시 키: cache:product:detail:id:{productId}
+     * TTL: 30분
      */
+    @Cacheable(value = "product", key = "'cache:product:detail:id:' + #productId")
     public Product getProduct(Long productId) {
         Product product = productRepository.findOne(productId);
         if (product == null) {
             throw new IllegalArgumentException("상품을 찾을 수 없습니다. productId: " + productId);
         }
-
-        // 조회수 증가
-        product.increaseViewCount();
-        productRepository.save(product);
-
-        // 일별 통계 업데이트
-        updateDailyViewStatistics(productId);
-
         return product;
+    }
+
+    /**
+     * 상품 조회 with 조회수 증가
+     * 조회수 증가가 필요한 경우 이 메서드 사용
+     */
+    public Product getProductWithViewCount(Long productId) {
+        increaseViewCountAsync(productId);
+        return self.getProduct(productId);
+    }
+
+    /**
+     * 조회수 증가 (캐시 없이 매번 실행)
+     */
+    private void increaseViewCountAsync(Long productId) {
+        Product product = productRepository.findOne(productId);
+        if (product != null) {
+            product.increaseViewCount();
+            productRepository.save(product);
+            updateDailyViewStatistics(productId);
+        }
     }
 
     /**
@@ -71,11 +98,21 @@ public class ProductService {
 
     /**
      * 재고 차감
+     * 재고 변경 시 상품 캐시 무효화
      */
     @DistributedLock(key = "product:stock:#{#productId}")
     @CustomTransactional
+    @CacheEvict(value = "product", key = "'cache:product:detail:id:' + #productId")
     public void deductStock(Long productId, int quantity) {
         Product product = productRepository.findOne(productId);
+
+        if (product == null) {
+            throw new IllegalArgumentException("상품을 찾을 수 없습니다. productId: " + productId);
+        }
+
+        if (!product.hasStock()) {
+            throw new NotEnoughStockException("품절된 상품입니다.");
+        }
 
         if (!product.hasEnoughStock(quantity)) {
             throw new NotEnoughStockException("재고가 부족합니다. 요청수량: " + quantity + ", 현재수량: " + product.getStock().getQuantity());
@@ -87,7 +124,9 @@ public class ProductService {
 
     /**
      * 재고 복구
+     * 재고 변경 시 상품 캐시 무효화
      */
+    @CacheEvict(value = "product", key = "'cache:product:detail:id:' + #productId")
     public void restoreStock(Long productId, int quantity) {
         Product product = productRepository.findOne(productId);
         if (product == null) {
@@ -122,7 +161,9 @@ public class ProductService {
 
     /**
      * 주문 수량 통계 업데이트 (주문 서비스에서 호출)
+     * 통계 업데이트 시 인기 상품 캐시 삭제
      */
+    @CacheEvict(value = {"popularProductsByView", "popularProductsByOrder"}, allEntries = true)
     public void updateOrderStatistics(Long productId, int quantity) {
         LocalDate today = LocalDate.now();
         Optional<ProductStatistics> existingStats = productStatisticsRepository.findByProductIdAndDate(productId, today);
@@ -144,7 +185,10 @@ public class ProductService {
 
     /**
      * 인기 상품 조회 (최근 3일간 조회수 기준)
+     * 캐시 키: cache:product:popular:view:{limit}
+     * TTL: 1시간
      */
+    @Cacheable(value = "popularProductsByView", key = "'cache:product:popular:view:' + #limit")
     public List<Product> getPopularProductsByViewCount(int limit) {
         LocalDate endDate = LocalDate.now();
         LocalDate startDate = endDate.minusDays(2); // 오늘 포함 3일
@@ -175,7 +219,10 @@ public class ProductService {
 
     /**
      * 인기 상품 조회 (최근 3일간 주문 수량 기준)
+     * 캐시 키: cache:product:popular:order:{limit}
+     * TTL: 1시간
      */
+    @Cacheable(value = "popularProductsByOrder", key = "'cache:product:popular:order:' + #limit")
     public List<Product> getPopularProductsByOrderCount(int limit) {
         LocalDate endDate = LocalDate.now();
         LocalDate startDate = endDate.minusDays(2); // 오늘 포함 3일
