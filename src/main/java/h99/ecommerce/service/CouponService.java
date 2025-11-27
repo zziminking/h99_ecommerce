@@ -1,5 +1,7 @@
 package h99.ecommerce.service;
 
+import h99.ecommerce.annotation.CustomTransactional;
+import h99.ecommerce.annotation.DistributedLock;
 import h99.ecommerce.domain.Coupon;
 import h99.ecommerce.domain.User;
 import h99.ecommerce.domain.UserCoupon;
@@ -33,14 +35,15 @@ public class CouponService {
      * @return 발급된 사용자 쿠폰
      * @throws IllegalStateException 중복 발급, 쿠폰 소진 등
      */
-    @Transactional
+    @DistributedLock(key = "coupon:issue:#{#couponId}")
+    @CustomTransactional
     public UserCoupon issueCoupon(Long userId, Long couponId) {
         Optional<UserCoupon> existingUserCoupon = userCouponRepository.findByUserIdAndCouponId(userId, couponId);
         if (existingUserCoupon.isPresent()) {
             throw new IllegalStateException("이미 발급받은 쿠폰입니다.");
         }
 
-        Coupon coupon = couponRepository.findByIdWithLock(couponId);
+        Coupon coupon = couponRepository.findOne(couponId);
         if (coupon == null) {
             throw new IllegalArgumentException("쿠폰을 찾을 수 없습니다. couponId: " + couponId);
         }

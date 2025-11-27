@@ -1,5 +1,7 @@
 package h99.ecommerce.service;
 
+import h99.ecommerce.annotation.CustomTransactional;
+import h99.ecommerce.annotation.DistributedLock;
 import h99.ecommerce.domain.Product;
 import h99.ecommerce.domain.ProductStatistics;
 import h99.ecommerce.exception.NotEnoughStockException;
@@ -11,7 +13,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -71,39 +72,17 @@ public class ProductService {
     /**
      * 재고 차감
      */
-    @Transactional
+    @DistributedLock(key = "product:stock:#{#productId}")
+    @CustomTransactional
     public void deductStock(Long productId, int quantity) {
-        int maxAttempts = 5;
+        Product product = productRepository.findOne(productId);
 
-        for (int attempt = 1; attempt <= maxAttempts; attempt++) {
-            int updateRows = productRepository.deductStockConditional(productId, quantity);
-
-            if (updateRows == 1) {
-                return;
-            }
-
-            Product product = productRepository.findOne(productId);
-            if (product == null) {
-                throw new IllegalArgumentException("상품을 찾을 수 없습니다. productId: " + productId);
-            }
-
-            if (product.getStock().getQuantity() < quantity) {
-                throw new NotEnoughStockException(
-                        "재고가 부족합니다. 요청수량: " + quantity +
-                                ", 현재수량: " + product.getStock().getQuantity()
-                );
-            }
-            if (attempt < maxAttempts) {
-                try {
-                    Thread.sleep(50); // 50ms 대기 후 재시도
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    throw new RuntimeException("재고 차감 재시도 중 인터럽트 발생", e);
-                }
-            }
+        if (!product.hasEnoughStock(quantity)) {
+            throw new NotEnoughStockException("재고가 부족합니다. 요청수량: " + quantity + ", 현재수량: " + product.getStock().getQuantity());
         }
 
-        throw new RuntimeException("재고 차감 실패!!!");
+        product.deductStock(quantity);
+        productRepository.save(product);
     }
 
     /**
