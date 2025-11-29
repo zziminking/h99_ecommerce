@@ -63,8 +63,7 @@ public class JpaProductStatisticsRepository implements ProductStatisticsReposito
     public List<ProductStatistics> findByDateBetween(LocalDate startDate, LocalDate endDate) {
         return em.createQuery(
                         "SELECT ps FROM ProductStatistics ps " +
-                                "WHERE ps.statisticsDate BETWEEN :startDate " +
-                                "AND ps.statisticsDate AND :endDate " +
+                                "WHERE ps.statisticsDate BETWEEN :startDate AND :endDate " +
                                 "ORDER BY ps.statisticsDate DESC",
                         ProductStatistics.class)
                 .setParameter("startDate", startDate)

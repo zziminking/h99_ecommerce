@@ -8,7 +8,7 @@ public interface PointRepository {
 
     Point save(Point point);
 
-    Point findOne(int pointId);
+    Point findOne(Long pointId);
 
-    List<Point> findByUserId(int userId);
+    List<Point> findByUserId(Long userId);
 }

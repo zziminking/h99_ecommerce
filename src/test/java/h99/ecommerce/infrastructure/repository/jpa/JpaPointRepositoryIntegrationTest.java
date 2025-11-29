@@ -46,7 +46,7 @@ class JpaPointRepositoryIntegrationTest extends BaseJpaRepositoryTest {
         flushAndClear();
 
         // when
-        Point found = pointRepository.findOne(saved.getPointId().intValue());
+        Point found = pointRepository.findOne(saved.getPointId());
 
         // then
         assertThat(found).isNotNull();
@@ -59,21 +59,21 @@ class JpaPointRepositoryIntegrationTest extends BaseJpaRepositoryTest {
     @DisplayName("사용자 ID로 포인트 목록 조회")
     void find_points_by_user_id() {
         // given
-        int userId = 3;
+        Long userId = 3L;
 
         Point point1 = Point.builder()
                 .orderId(10L)
-                .userId((long) userId)
+                .userId(userId)
                 .amount(BigDecimal.valueOf(1000))
                 .build();
         Point point2 = Point.builder()
                 .orderId(11L)
-                .userId((long) userId)
+                .userId(userId)
                 .amount(BigDecimal.valueOf(-500))
                 .build();
         Point point3 = Point.builder()
                 .orderId(12L)
-                .userId((long) userId)
+                .userId(userId)
                 .amount(BigDecimal.valueOf(2000))
                 .build();
 
@@ -108,7 +108,7 @@ class JpaPointRepositoryIntegrationTest extends BaseJpaRepositoryTest {
         flushAndClear();
 
         // when
-        Point found = pointRepository.findOne(saved.getPointId().intValue());
+        Point found = pointRepository.findOne(saved.getPointId());
 
         // then
         assertThat(found).isNotNull();
@@ -129,7 +129,7 @@ class JpaPointRepositoryIntegrationTest extends BaseJpaRepositoryTest {
         flushAndClear();
 
         // when
-        Point found = pointRepository.findOne(saved.getPointId().intValue());
+        Point found = pointRepository.findOne(saved.getPointId());
 
         // then
         assertThat(found).isNotNull();

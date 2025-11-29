@@ -28,7 +28,7 @@ public class ProductController {
     }
 
     /**
-     * 상품 상세 조회
+     * 상품 상세 조회 (조회수 증가)
      */
     @GetMapping("/{productId}")
     public ResponseEntity<Product> getProduct(
@@ -38,7 +38,7 @@ public class ProductController {
             return ResponseEntity.badRequest().build();
         }
 
-        Product product = productService.getProduct(productId);
+        Product product = productService.getProductWithViewCount(productId);
         return ResponseEntity.ok(product);
     }
 

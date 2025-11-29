@@ -16,3 +16,7 @@ spring:
         format_sql: true
         show_sql: true
         dialect: org.hibernate.dialect.MySQLDialect
+
+logging:
+  level:
+    h99.ecommerce.aspect.DistributedLockAspect: DEBUG  # 분산 락 로그 활성화
