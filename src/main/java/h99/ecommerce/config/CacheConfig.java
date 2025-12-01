@@ -49,19 +49,38 @@ public class CacheConfig {
 
         Map<String, RedisCacheConfiguration> cacheConfigurations = new HashMap<>();
 
+        // Jitter적용
         cacheConfigurations.put("popularProductsByView",
-                defaultConfig.entryTtl(Duration.ofHours(1)));
+                defaultConfig.entryTtl(getTtlWithJitter(Duration.ofHours(1), Duration.ofMinutes(5))));
 
         cacheConfigurations.put("popularProductsByOrder",
-                defaultConfig.entryTtl(Duration.ofHours(1)));
+                defaultConfig.entryTtl(getTtlWithJitter(Duration.ofHours(1), Duration.ofMinutes(5))));
 
         cacheConfigurations.put("product",
-                defaultConfig.entryTtl(Duration.ofMinutes(30)));
+                defaultConfig.entryTtl(getTtlWithJitter(Duration.ofMinutes(30), Duration.ofMinutes(2))));
 
         return RedisCacheManager.builder(connectionFactory)
                 .cacheDefaults(defaultConfig)
                 .withInitialCacheConfigurations(cacheConfigurations)
-                .transactionAware() // 트랜잭션 지원
+                .transactionAware()
                 .build();
     }
+
+    /**
+     * Jitter를 적용한 TTL 생성 Cache Stampede 방지: 캐시 만료 시점을 분산시켜 동시 만료 방지
+     */
+    private Duration getTtlWithJitter(Duration baseTtl, Duration jitterRange) {
+        long baseSeconds = baseTtl.getSeconds();
+        long jitterSeconds = jitterRange.getSeconds();
+
+        long randomJitter = (long) (Math.random() * jitterSeconds * 2) - jitterSeconds;
+        long finalTtl = baseSeconds + randomJitter;
+
+        if (finalTtl < 10) {
+            finalTtl = 10;
+        }
+
+        return Duration.ofSeconds(finalTtl);
+    }
+
 }
