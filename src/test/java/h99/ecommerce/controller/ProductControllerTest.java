@@ -1,7 +1,7 @@
 package h99.ecommerce.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import h99.ecommerce.domain.Product;
+import h99.ecommerce.domain.product.Product;
 import h99.ecommerce.domain.vo.Stock;
 import h99.ecommerce.service.ProductService;
 import org.junit.jupiter.api.DisplayName;

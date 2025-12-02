@@ -2,12 +2,12 @@ package h99.ecommerce.service;
 
 import h99.ecommerce.annotation.CustomTransactional;
 import h99.ecommerce.annotation.DistributedLock;
-import h99.ecommerce.domain.Coupon;
-import h99.ecommerce.domain.User;
-import h99.ecommerce.domain.UserCoupon;
-import h99.ecommerce.repository.CouponRepository;
-import h99.ecommerce.repository.UserCouponRepository;
-import h99.ecommerce.repository.UserRepository;
+import h99.ecommerce.domain.coupon.Coupon;
+import h99.ecommerce.domain.user.User;
+import h99.ecommerce.domain.coupon.UserCoupon;
+import h99.ecommerce.domain.coupon.CouponRepository;
+import h99.ecommerce.domain.coupon.UserCouponRepository;
+import h99.ecommerce.domain.user.UserRepository;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

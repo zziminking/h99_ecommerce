@@ -1,6 +1,6 @@
-package h99.ecommerce.repository;
+package h99.ecommerce.domain.product;
 
-import h99.ecommerce.domain.Product;
+import h99.ecommerce.domain.product.Product;
 import java.util.List;
 
 public interface ProductRepository {

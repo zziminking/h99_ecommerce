@@ -1,11 +1,24 @@
 package h99.ecommerce.service;
 
+import h99.ecommerce.domain.product.Product;
+import h99.ecommerce.domain.product.ProductStatistics;
+import h99.ecommerce.domain.order.Order;
+import h99.ecommerce.domain.order.OrderItem;
+import h99.ecommerce.domain.order.OrderStatus;
+import h99.ecommerce.domain.coupon.Coupon;
+import h99.ecommerce.domain.coupon.CouponStatus;
+import h99.ecommerce.domain.coupon.DiscountType;
+import h99.ecommerce.domain.coupon.UserCoupon;
+import h99.ecommerce.domain.user.User;
+import h99.ecommerce.domain.cartitem.CartItem;
+import h99.ecommerce.domain.point.Point;
+
 import com.redis.testcontainers.RedisContainer;
-import h99.ecommerce.domain.Product;
-import h99.ecommerce.domain.ProductStatistics;
+import h99.ecommerce.domain.product.Product;
+import h99.ecommerce.domain.product.ProductStatistics;
 import h99.ecommerce.domain.vo.Stock;
-import h99.ecommerce.repository.ProductRepository;
-import h99.ecommerce.repository.ProductStatisticsRepository;
+import h99.ecommerce.domain.product.ProductRepository;
+import h99.ecommerce.domain.product.ProductStatisticsRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

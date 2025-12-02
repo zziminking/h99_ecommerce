@@ -2,11 +2,11 @@ package h99.ecommerce.service;
 
 import h99.ecommerce.annotation.CustomTransactional;
 import h99.ecommerce.annotation.DistributedLock;
-import h99.ecommerce.domain.Product;
-import h99.ecommerce.domain.ProductStatistics;
+import h99.ecommerce.domain.product.Product;
+import h99.ecommerce.domain.product.ProductStatistics;
 import h99.ecommerce.exception.NotEnoughStockException;
-import h99.ecommerce.repository.ProductRepository;
-import h99.ecommerce.repository.ProductStatisticsRepository;
+import h99.ecommerce.domain.product.ProductRepository;
+import h99.ecommerce.domain.product.ProductStatisticsRepository;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;

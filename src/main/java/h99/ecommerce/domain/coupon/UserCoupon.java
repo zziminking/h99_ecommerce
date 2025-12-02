@@ -1,5 +1,6 @@
-package h99.ecommerce.domain;
+package h99.ecommerce.domain.coupon;
 
+import h99.ecommerce.domain.user.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;

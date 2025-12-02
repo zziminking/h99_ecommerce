@@ -1,6 +1,6 @@
-package h99.ecommerce.repository;
+package h99.ecommerce.domain.user;
 
-import h99.ecommerce.domain.User;
+import h99.ecommerce.domain.user.User;
 
 public interface UserRepository {
 

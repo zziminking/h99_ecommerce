@@ -1,4 +1,4 @@
-package h99.ecommerce.domain;
+package h99.ecommerce.domain.coupon;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

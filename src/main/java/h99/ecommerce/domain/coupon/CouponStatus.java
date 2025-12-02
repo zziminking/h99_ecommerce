@@ -1,4 +1,4 @@
-package h99.ecommerce.domain;
+package h99.ecommerce.domain.coupon;
 
 public enum CouponStatus {
     ACTIVE,    // 활성

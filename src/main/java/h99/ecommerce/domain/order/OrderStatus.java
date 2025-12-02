@@ -1,4 +1,4 @@
-package h99.ecommerce.domain;
+package h99.ecommerce.domain.order;
 
 public enum OrderStatus {
     PENDING,      // 대기

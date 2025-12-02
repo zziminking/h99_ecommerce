@@ -1,5 +1,6 @@
-package h99.ecommerce.domain;
+package h99.ecommerce.domain.order;
 
+import h99.ecommerce.domain.user.User;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

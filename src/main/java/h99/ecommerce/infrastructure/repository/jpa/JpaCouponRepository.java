@@ -1,7 +1,7 @@
 package h99.ecommerce.infrastructure.repository.jpa;
 
-import h99.ecommerce.domain.Coupon;
-import h99.ecommerce.repository.CouponRepository;
+import h99.ecommerce.domain.coupon.Coupon;
+import h99.ecommerce.domain.coupon.CouponRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.PersistenceContext;

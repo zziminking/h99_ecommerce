@@ -1,5 +1,17 @@
 package h99.ecommerce.domain;
 
+import h99.ecommerce.domain.product.Product;
+import h99.ecommerce.domain.order.Order;
+import h99.ecommerce.domain.order.OrderItem;
+import h99.ecommerce.domain.order.OrderStatus;
+import h99.ecommerce.domain.coupon.Coupon;
+import h99.ecommerce.domain.coupon.CouponStatus;
+import h99.ecommerce.domain.coupon.DiscountType;
+import h99.ecommerce.domain.coupon.UserCoupon;
+import h99.ecommerce.domain.user.User;
+import h99.ecommerce.domain.cartitem.CartItem;
+import h99.ecommerce.domain.point.Point;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,13 +32,13 @@ public class OrderTest {
     @BeforeEach
     void setUp() {
         order = new Order(1L, user, 0, BigDecimal.ZERO, null, null, null, new ArrayList<>());
-        
+
         orderItem1 = new OrderItem(
                 1L, order, product, 3, OrderStatus.PENDING,
                 new BigDecimal("30000"), BigDecimal.ZERO, new BigDecimal("30000"),
                 new BigDecimal("10000"), null, null
         );
-        
+
         orderItem2 = new OrderItem(
                 2L, order, product, 2, OrderStatus.PENDING,
                 new BigDecimal("40000"), BigDecimal.ZERO, new BigDecimal("40000"),

@@ -1,7 +1,7 @@
 package h99.ecommerce.controller;
 
-import h99.ecommerce.domain.Coupon;
-import h99.ecommerce.domain.UserCoupon;
+import h99.ecommerce.domain.coupon.Coupon;
+import h99.ecommerce.domain.coupon.UserCoupon;
 import h99.ecommerce.service.CouponService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

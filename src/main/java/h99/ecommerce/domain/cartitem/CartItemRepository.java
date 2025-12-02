@@ -1,6 +1,6 @@
-package h99.ecommerce.repository;
+package h99.ecommerce.domain.cartitem;
 
-import h99.ecommerce.domain.CartItem;
+import h99.ecommerce.domain.cartitem.CartItem;
 import java.util.List;
 import java.util.Optional;
 

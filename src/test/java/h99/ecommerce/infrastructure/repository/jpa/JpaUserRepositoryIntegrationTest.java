@@ -1,6 +1,6 @@
 package h99.ecommerce.infrastructure.repository.jpa;
 
-import h99.ecommerce.domain.User;
+import h99.ecommerce.domain.user.User;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

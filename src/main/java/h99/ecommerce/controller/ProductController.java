@@ -1,6 +1,6 @@
 package h99.ecommerce.controller;
 
-import h99.ecommerce.domain.Product;
+import h99.ecommerce.domain.product.Product;
 import h99.ecommerce.service.ProductService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;

@@ -1,7 +1,7 @@
 package h99.ecommerce.infrastructure.repository.jpa;
 
-import h99.ecommerce.domain.ProductStatistics;
-import h99.ecommerce.repository.ProductStatisticsRepository;
+import h99.ecommerce.domain.product.ProductStatistics;
+import h99.ecommerce.domain.product.ProductStatisticsRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import java.time.LocalDate;

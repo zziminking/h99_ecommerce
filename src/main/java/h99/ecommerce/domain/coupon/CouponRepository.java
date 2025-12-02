@@ -1,6 +1,6 @@
-package h99.ecommerce.repository;
+package h99.ecommerce.domain.coupon;
 
-import h99.ecommerce.domain.Coupon;
+import h99.ecommerce.domain.coupon.Coupon;
 
 import java.util.List;
 

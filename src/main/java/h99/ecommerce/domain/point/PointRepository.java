@@ -1,6 +1,6 @@
-package h99.ecommerce.repository;
+package h99.ecommerce.domain.point;
 
-import h99.ecommerce.domain.Point;
+import h99.ecommerce.domain.point.Point;
 
 import java.util.List;
 
