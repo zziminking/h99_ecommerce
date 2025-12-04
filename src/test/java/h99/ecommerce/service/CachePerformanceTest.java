@@ -172,43 +172,14 @@ public class CachePerformanceTest {
     }
 
     /**
-     * 인기 상품 조회 성능 테스트
+     * 인기 상품은 이제 Redis Sorted Set을 직접 사용
+     * 성능 테스트는 PopularProductIntegrationTest 참고
      */
     private void testPopularProductsPerformance() {
-        int limit = 10;
-
-        System.out.println("🔍 첫 번째 조회 (Cache Miss - DB 조회)");
-        long firstCallStart = System.currentTimeMillis();
-        List<Product> firstResult = productService.getPopularProductsByViewCount(limit);
-        long firstCallTime = System.currentTimeMillis() - firstCallStart;
-        
-        System.out.println("   ⏱️  소요 시간: " + firstCallTime + "ms");
-        System.out.println("   📦 조회 결과: " + firstResult.size() + "개\n");
-
-        // 두 번째 조회 (Cache Hit)
-        System.out.println("🔍 두 번째 조회 (Cache Hit - Redis 조회)");
-        long secondCallStart = System.currentTimeMillis();
-        List<Product> secondResult = productService.getPopularProductsByViewCount(limit);
-        long secondCallTime = System.currentTimeMillis() - secondCallStart;
-        
-        System.out.println("   ⏱️  소요 시간: " + secondCallTime + "ms");
-        System.out.println("   📦 조회 결과: " + secondResult.size() + "개\n");
-
-        // 성능 개선율 계산
-        double improvement = (double) firstCallTime / secondCallTime;
-        
-        System.out.println("📈 성능 개선 결과:");
-        System.out.println("   Before (DB): " + firstCallTime + "ms");
-        System.out.println("   After (Cache): " + secondCallTime + "ms");
-        System.out.println("   개선율: " + String.format("%.1f", improvement) + "배");
-        System.out.println("   개선률: " + String.format("%.1f", (1 - (double)secondCallTime/firstCallTime) * 100) + "%\n");
-
-        // 검증
-        assertThat(secondResult).isEqualTo(firstResult);
-        assertThat(secondCallTime).isLessThan(firstCallTime);
-        
-        System.out.println("✅ 캐시 히트 확인: 동일한 결과 반환");
-        System.out.println("✅ 성능 개선 확인: Cache Hit가 더 빠름\n");
+        System.out.println("\n========================================");
+        System.out.println("⚠️  인기 상품은 Redis Sorted Set으로 변경됨");
+        System.out.println("   PopularProductIntegrationTest 참고");
+        System.out.println("========================================\n");
     }
 
     /**

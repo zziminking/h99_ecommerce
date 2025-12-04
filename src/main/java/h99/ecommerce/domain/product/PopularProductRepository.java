@@ -10,4 +10,7 @@ public interface PopularProductRepository {
     List<Long> getTopProducts(String priod, int limit);
     Long getLank(String period, Long productId);
     void setExpiration(String period, long seconds);
+    void incrementScore(String period, Long productId, double delta);
+    Double getScore(String period, Long productId);
+    boolean exists(String period);
 }

@@ -1,7 +1,9 @@
 package h99.ecommerce.service;
 
+import com.esotericsoftware.minlog.Log;
 import h99.ecommerce.annotation.CustomTransactional;
 import h99.ecommerce.annotation.DistributedLock;
+import h99.ecommerce.domain.product.PopularProductRepository;
 import h99.ecommerce.domain.product.Product;
 import h99.ecommerce.domain.product.ProductStatistics;
 import h99.ecommerce.exception.NotEnoughStockException;
@@ -14,17 +16,20 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ProductService {
 
     private final ProductRepository productRepository;
     private final ProductStatisticsRepository productStatisticsRepository;
+    private final PopularProductRepository popularProductRepository;
 
     /**
      * 상품 단건 조회 (캐시 적용) 캐시 키: cache:product:detail:id:{productId} TTL: 30분
@@ -57,6 +62,13 @@ public class ProductService {
             product.increaseViewCount();
             productRepository.save(product);
             updateDailyViewStatistics(productId);
+
+            try {
+                popularProductRepository.incrementScore("3days", productId, 1.0);
+                popularProductRepository.incrementScore("7days", productId, 1.0);
+            } catch (Exception e) {
+                log.error("레디스 score 증가 실패, productId: {}", productId, e);
+            }
         }
     }
 
@@ -174,70 +186,36 @@ public class ProductService {
                     .build();
             productStatisticsRepository.save(newStats);
         }
+
+        // Redis 인기 상품 score 증가 (주문 1건당 +5점)
+        try {
+            double scoreIncrement = quantity * 5.0;
+            popularProductRepository.incrementScore("3days", productId, scoreIncrement);
+            popularProductRepository.incrementScore("7days", productId, scoreIncrement);
+        } catch (Exception e) {
+            log.error("레디스 score 증가 실패, productId: {}", productId, e);
+        }
     }
 
     /**
-     * 인기 상품 조회 (최근 3일간 조회수 기준) 캐시 키: cache:product:popular:view:{limit} TTL: 1시간
+     * 인기 상품 조회(redis)
      */
-    @Cacheable(value = "popularProductsByView", key = "'cache:product:popular:view:' + #limit")
-    public List<Product> getPopularProductsByViewCount(int limit) {
-        LocalDate endDate = LocalDate.now();
-        LocalDate startDate = endDate.minusDays(2); // 오늘 포함 3일
+    public List<Product> getPopularProducts(String period, int limit) {
+        try {
+            List<Long> productIds = popularProductRepository.getTopProducts(period, limit);
 
-        // 최근 3일간 통계 조회
-        List<ProductStatistics> recentStats = productStatisticsRepository.findByDateBetween(startDate, endDate);
+            if (productIds.isEmpty()) {
+                log.warn("해당 기간 인기상품 목록이 없습니다. 기간: {}", period);
+                return List.of();
+            }
 
-        // 상품별 조회수 합산
-        Map<Long, Integer> productViewCounts = recentStats.stream()
-                .collect(Collectors.groupingBy(
-                        ProductStatistics::getProductId,
-                        Collectors.summingInt(ProductStatistics::getViewCount)
-                ));
-
-        // 조회수 순으로 정렬하여 상위 N개 추출
-        List<Long> topProductIds = productViewCounts.entrySet().stream()
-                .sorted(Map.Entry.<Long, Integer>comparingByValue().reversed())
-                .limit(limit)
-                .map(Map.Entry::getKey)
-                .toList();
-
-        // 상품 정보 조회
-        return topProductIds.stream()
-                .map(productRepository::findOne)
-                .filter(Objects::nonNull)
-                .toList();
+            return productIds.stream()
+                    .map(this::getProduct)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            log.error("인기상품 조회에 실패하였습니다.");
+            return List.of();
+        }
     }
-
-    /**
-     * 인기 상품 조회 (최근 3일간 주문 수량 기준) 캐시 키: cache:product:popular:order:{limit} TTL: 1시간
-     */
-    @Cacheable(value = "popularProductsByOrder", key = "'cache:product:popular:order:' + #limit")
-    public List<Product> getPopularProductsByOrderCount(int limit) {
-        LocalDate endDate = LocalDate.now();
-        LocalDate startDate = endDate.minusDays(2); // 오늘 포함 3일
-
-        // 최근 3일간 통계 조회
-        List<ProductStatistics> recentStats = productStatisticsRepository.findByDateBetween(startDate, endDate);
-
-        // 상품별 주문 수량 합산
-        Map<Long, Integer> productOrderCounts = recentStats.stream()
-                .collect(Collectors.groupingBy(
-                        ProductStatistics::getProductId,
-                        Collectors.summingInt(ProductStatistics::getOrderCount)
-                ));
-
-        // 주문 수량 순으로 정렬하여 상위 N개 추출
-        List<Long> topProductIds = productOrderCounts.entrySet().stream()
-                .sorted(Map.Entry.<Long, Integer>comparingByValue().reversed())
-                .limit(limit)
-                .map(Map.Entry::getKey)
-                .toList();
-
-        // 상품 정보 조회
-        return topProductIds.stream()
-                .map(productRepository::findOne)
-                .filter(Objects::nonNull)
-                .toList();
-    }
-
 }
