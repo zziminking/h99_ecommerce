@@ -2,14 +2,14 @@ package h99.ecommerce.service;
 
 import h99.ecommerce.annotation.CustomTransactional;
 import h99.ecommerce.annotation.DistributedLock;
-import h99.ecommerce.domain.Coupon;
-import h99.ecommerce.domain.Point;
-import h99.ecommerce.domain.User;
-import h99.ecommerce.domain.UserCoupon;
-import h99.ecommerce.repository.CouponRepository;
-import h99.ecommerce.repository.PointRepository;
-import h99.ecommerce.repository.UserCouponRepository;
-import h99.ecommerce.repository.UserRepository;
+import h99.ecommerce.domain.coupon.Coupon;
+import h99.ecommerce.domain.point.Point;
+import h99.ecommerce.domain.user.User;
+import h99.ecommerce.domain.coupon.UserCoupon;
+import h99.ecommerce.domain.coupon.CouponRepository;
+import h99.ecommerce.domain.point.PointRepository;
+import h99.ecommerce.domain.coupon.UserCouponRepository;
+import h99.ecommerce.domain.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

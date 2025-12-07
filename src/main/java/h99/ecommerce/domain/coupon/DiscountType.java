@@ -1,4 +1,4 @@
-package h99.ecommerce.domain;
+package h99.ecommerce.domain.coupon;
 
 public enum DiscountType {
     FIXED,      // 정액 할인

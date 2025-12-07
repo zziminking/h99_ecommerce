@@ -1,6 +1,6 @@
-package h99.ecommerce.repository;
+package h99.ecommerce.domain.order;
 
-import h99.ecommerce.domain.Order;
+import h99.ecommerce.domain.order.Order;
 import java.util.List;
 
 public interface OrderRepository {

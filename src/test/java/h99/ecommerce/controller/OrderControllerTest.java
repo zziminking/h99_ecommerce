@@ -1,8 +1,8 @@
 package h99.ecommerce.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import h99.ecommerce.domain.Order;
-import h99.ecommerce.domain.User;
+import h99.ecommerce.domain.order.Order;
+import h99.ecommerce.domain.user.User;
 import h99.ecommerce.service.OrderService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

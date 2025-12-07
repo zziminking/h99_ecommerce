@@ -1,6 +1,6 @@
 package h99.ecommerce.controller;
 
-import h99.ecommerce.domain.Product;
+import h99.ecommerce.domain.product.Product;
 import h99.ecommerce.service.ProductService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -77,32 +77,21 @@ public class ProductController {
     }
 
     /**
-     * 인기 상품 조회 (최근 3일간 조회수 기준)
+     * 인기 상품 조회 (Redis Sorted Set 기반)
      */
-    @GetMapping("/popular/views")
-    public ResponseEntity<List<Product>> getPopularProductsByViewCount(
-            @RequestParam(defaultValue = "5") Integer limit
-    ) {
+    @GetMapping("/popular/{period}")
+    public ResponseEntity<List<Product>> getPopularProducts(@PathVariable String period,
+                                                            @RequestParam(defaultValue = "5") Integer limit) {
+        if (!period.equals("3days") && !period.equals("7days")) {
+            return ResponseEntity.badRequest().build();
+        }
+
         if (limit == null || limit <= 0) {
             limit = 5;
         }
 
-        List<Product> popularProducts = productService.getPopularProductsByViewCount(limit);
+        List<Product> popularProducts = productService.getPopularProducts(period, limit);
         return ResponseEntity.ok(popularProducts);
     }
 
-    /**
-     * 인기 상품 조회 (최근 3일간 주문 수량 기준)
-     */
-    @GetMapping("/popular/orders")
-    public ResponseEntity<List<Product>> getPopularProductsByOrderCount(
-            @RequestParam(defaultValue = "5") Integer limit
-    ) {
-        if (limit == null || limit <= 0) {
-            limit = 5;
-        }
-
-        List<Product> popularProducts = productService.getPopularProductsByOrderCount(limit);
-        return ResponseEntity.ok(popularProducts);
-    }
 }

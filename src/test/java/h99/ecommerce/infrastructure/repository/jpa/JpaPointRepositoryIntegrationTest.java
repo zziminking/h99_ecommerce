@@ -2,7 +2,7 @@ package h99.ecommerce.infrastructure.repository.jpa;
 
 import static org.assertj.core.api.Assertions.*;
 
-import h99.ecommerce.domain.Point;
+import h99.ecommerce.domain.point.Point;
 import java.math.BigDecimal;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;

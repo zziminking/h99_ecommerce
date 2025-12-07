@@ -2,7 +2,7 @@ package h99.ecommerce.infrastructure.repository.jpa;
 
 import static org.assertj.core.api.Assertions.*;
 
-import h99.ecommerce.domain.ProductStatistics;
+import h99.ecommerce.domain.product.ProductStatistics;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;

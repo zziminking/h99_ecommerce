@@ -1,7 +1,7 @@
 package h99.ecommerce.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import h99.ecommerce.domain.Product;
+import h99.ecommerce.domain.product.Product;
 import h99.ecommerce.domain.vo.Stock;
 import h99.ecommerce.service.ProductService;
 import org.junit.jupiter.api.DisplayName;
@@ -144,71 +144,5 @@ class ProductControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
-    @Test
-    @DisplayName("인기 상품 조회 (조회수 기준) API 성공")
-    void getPopularProductsByViewCount_Success() throws Exception {
-        // given
-        List<Product> popularProducts = Arrays.asList(
-                new Product(1L, "인기상품1", "설명1", new BigDecimal("10000"), new Stock(10), 0, LocalDateTime.now(), LocalDateTime.now()),
-                new Product(2L, "인기상품2", "설명2", new BigDecimal("20000"), new Stock(20), 0, LocalDateTime.now(), LocalDateTime.now())
-        );
-        given(productService.getPopularProductsByViewCount(5)).willReturn(popularProducts);
-
-        // when & then
-        mockMvc.perform(get("/api/products/popular/views")
-                        .param("limit", "5"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(2))
-                .andExpect(jsonPath("$[0].name").value("인기상품1"))
-                .andExpect(jsonPath("$[1].name").value("인기상품2"));
-    }
-
-    @Test
-    @DisplayName("인기 상품 조회 (조회수 기준) API - 기본 limit 값")
-    void getPopularProductsByViewCount_DefaultLimit() throws Exception {
-        // given
-        List<Product> popularProducts = Arrays.asList(
-                new Product(1L, "인기상품1", "설명1", new BigDecimal("10000"), new Stock(10), 0, LocalDateTime.now(), LocalDateTime.now())
-        );
-        given(productService.getPopularProductsByViewCount(5)).willReturn(popularProducts);
-
-        // when & then - limit 파라미터 없이 요청
-        mockMvc.perform(get("/api/products/popular/views"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(1));
-    }
-
-    @Test
-    @DisplayName("인기 상품 조회 (주문 수량 기준) API 성공")
-    void getPopularProductsByOrderCount_Success() throws Exception {
-        // given
-        List<Product> popularProducts = Arrays.asList(
-                new Product(1L, "베스트상품1", "설명1", new BigDecimal("10000"), new Stock(10), 0, LocalDateTime.now(), LocalDateTime.now()),
-                new Product(2L, "베스트상품2", "설명2", new BigDecimal("20000"), new Stock(20), 0, LocalDateTime.now(), LocalDateTime.now())
-        );
-        given(productService.getPopularProductsByOrderCount(5)).willReturn(popularProducts);
-
-        // when & then
-        mockMvc.perform(get("/api/products/popular/orders")
-                        .param("limit", "5"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(2))
-                .andExpect(jsonPath("$[0].name").value("베스트상품1"))
-                .andExpect(jsonPath("$[1].name").value("베스트상품2"));
-    }
-
-    @Test
-    @DisplayName("인기 상품 조회 (주문 수량 기준) API - 기본 limit 값")
-    void getPopularProductsByOrderCount_DefaultLimit() throws Exception {
-        // given
-        List<Product> popularProducts = Arrays.asList(
-                new Product(1L, "베스트상품1", "설명1", new BigDecimal("10000"), new Stock(10), 0, LocalDateTime.now(), LocalDateTime.now())
-        );
-        given(productService.getPopularProductsByOrderCount(5)).willReturn(popularProducts);
-
-        // when & then - limit 파라미터 없이 요청
-        mockMvc.perform(get("/api/products/popular/orders"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(1));
-    }
+    // 기존 인기상품 테스트는 PopularProductIntegrationTest로 이동
 }

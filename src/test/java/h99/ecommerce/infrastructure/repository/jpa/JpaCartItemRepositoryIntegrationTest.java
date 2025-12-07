@@ -3,7 +3,7 @@ package h99.ecommerce.infrastructure.repository.jpa;
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-import h99.ecommerce.domain.CartItem;
+import h99.ecommerce.domain.cartitem.CartItem;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

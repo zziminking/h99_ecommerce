@@ -1,14 +1,27 @@
 package h99.ecommerce.service;
 
+import h99.ecommerce.domain.product.Product;
+import h99.ecommerce.domain.product.ProductStatistics;
+import h99.ecommerce.domain.order.Order;
+import h99.ecommerce.domain.order.OrderItem;
+import h99.ecommerce.domain.order.OrderStatus;
+import h99.ecommerce.domain.coupon.Coupon;
+import h99.ecommerce.domain.coupon.CouponStatus;
+import h99.ecommerce.domain.coupon.DiscountType;
+import h99.ecommerce.domain.coupon.UserCoupon;
+import h99.ecommerce.domain.user.User;
+import h99.ecommerce.domain.cartitem.CartItem;
+import h99.ecommerce.domain.point.Point;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import h99.ecommerce.domain.Product;
-import h99.ecommerce.domain.ProductStatistics;
+import h99.ecommerce.domain.product.Product;
+import h99.ecommerce.domain.product.ProductStatistics;
 import h99.ecommerce.domain.vo.Stock;
 import h99.ecommerce.exception.NotEnoughStockException;
-import h99.ecommerce.repository.ProductRepository;
-import h99.ecommerce.repository.ProductStatisticsRepository;
+import h99.ecommerce.domain.product.ProductRepository;
+import h99.ecommerce.domain.product.ProductStatisticsRepository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -44,12 +57,10 @@ public class ProductServiceTest {
     }
 
     @Test
-    @DisplayName("상품 단건 조회 - 성공 및 조회수 증가")
+    @DisplayName("상품 단건 조회 - 성공 (캐시)")
     void get_product_success() {
         // given
         when(productRepository.findOne(1L)).thenReturn(testProduct);
-        when(productStatisticsRepository.findByProductIdAndDate(anyLong(), any(LocalDate.class)))
-                .thenReturn(Optional.empty());
 
         // when
         Product result = productService.getProduct(1L);
@@ -57,10 +68,12 @@ public class ProductServiceTest {
         // then
         assertNotNull(result);
         assertEquals(1, result.getProductId());
-        assertEquals(1, result.getTotalViewCount()); // 조회수 증가 확인
-        verify(productRepository).save(testProduct);
-        verify(productStatisticsRepository).save(any(ProductStatistics.class));
+        assertEquals(0, result.getTotalViewCount()); // 캐시만 하고 조회수는 증가하지 않음
+        verify(productRepository, times(1)).findOne(1L);
+        verify(productRepository, never()).save(any());
+        verify(productStatisticsRepository, never()).save(any());
     }
+
 
     @Test
     @DisplayName("상품 단건 조회 - 상품 없음 실패")

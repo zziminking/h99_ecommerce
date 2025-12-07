@@ -1,6 +1,6 @@
 package h99.ecommerce.controller;
 
-import h99.ecommerce.domain.Order;
+import h99.ecommerce.domain.order.Order;
 import h99.ecommerce.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

@@ -1,6 +1,6 @@
 package h99.ecommerce.dto;
 
-import h99.ecommerce.domain.Product;
+import h99.ecommerce.domain.product.Product;
 import java.math.BigDecimal;
 import lombok.Builder;
 import lombok.Getter;

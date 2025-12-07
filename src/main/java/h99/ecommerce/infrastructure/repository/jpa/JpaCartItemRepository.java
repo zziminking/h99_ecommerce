@@ -1,7 +1,7 @@
 package h99.ecommerce.infrastructure.repository.jpa;
 
-import h99.ecommerce.domain.CartItem;
-import h99.ecommerce.repository.CartItemRepository;
+import h99.ecommerce.domain.cartitem.CartItem;
+import h99.ecommerce.domain.cartitem.CartItemRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;

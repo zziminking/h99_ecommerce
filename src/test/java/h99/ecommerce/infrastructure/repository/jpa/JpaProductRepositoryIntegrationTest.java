@@ -3,7 +3,7 @@ package h99.ecommerce.infrastructure.repository.jpa;
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-import h99.ecommerce.domain.Product;
+import h99.ecommerce.domain.product.Product;
 import h99.ecommerce.domain.vo.Stock;
 import java.math.BigDecimal;
 import java.util.List;

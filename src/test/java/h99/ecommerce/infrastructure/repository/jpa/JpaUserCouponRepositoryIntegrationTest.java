@@ -2,11 +2,11 @@ package h99.ecommerce.infrastructure.repository.jpa;
 
 import static org.assertj.core.api.Assertions.*;
 
-import h99.ecommerce.domain.Coupon;
-import h99.ecommerce.domain.CouponStatus;
-import h99.ecommerce.domain.DiscountType;
-import h99.ecommerce.domain.User;
-import h99.ecommerce.domain.UserCoupon;
+import h99.ecommerce.domain.coupon.Coupon;
+import h99.ecommerce.domain.coupon.CouponStatus;
+import h99.ecommerce.domain.coupon.DiscountType;
+import h99.ecommerce.domain.user.User;
+import h99.ecommerce.domain.coupon.UserCoupon;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;

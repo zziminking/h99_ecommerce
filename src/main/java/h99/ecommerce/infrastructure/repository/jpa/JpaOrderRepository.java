@@ -1,7 +1,7 @@
 package h99.ecommerce.infrastructure.repository.jpa;
 
-import h99.ecommerce.domain.Order;
-import h99.ecommerce.repository.OrderRepository;
+import h99.ecommerce.domain.order.Order;
+import h99.ecommerce.domain.order.OrderRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import java.util.List;

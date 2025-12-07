@@ -1,7 +1,7 @@
 package h99.ecommerce.infrastructure.repository.jpa;
 
-import h99.ecommerce.domain.User;
-import h99.ecommerce.repository.UserRepository;
+import h99.ecommerce.domain.user.User;
+import h99.ecommerce.domain.user.UserRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;

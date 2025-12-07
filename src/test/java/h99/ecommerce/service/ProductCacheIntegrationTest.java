@@ -1,13 +1,26 @@
 package h99.ecommerce.service;
 
+import h99.ecommerce.domain.product.Product;
+import h99.ecommerce.domain.product.ProductStatistics;
+import h99.ecommerce.domain.order.Order;
+import h99.ecommerce.domain.order.OrderItem;
+import h99.ecommerce.domain.order.OrderStatus;
+import h99.ecommerce.domain.coupon.Coupon;
+import h99.ecommerce.domain.coupon.CouponStatus;
+import h99.ecommerce.domain.coupon.DiscountType;
+import h99.ecommerce.domain.coupon.UserCoupon;
+import h99.ecommerce.domain.user.User;
+import h99.ecommerce.domain.cartitem.CartItem;
+import h99.ecommerce.domain.point.Point;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.redis.testcontainers.RedisContainer;
-import h99.ecommerce.domain.Coupon;
-import h99.ecommerce.domain.Product;
+import h99.ecommerce.domain.coupon.Coupon;
+import h99.ecommerce.domain.product.Product;
 import h99.ecommerce.domain.vo.Stock;
-import h99.ecommerce.repository.ProductRepository;
-import h99.ecommerce.repository.ProductStatisticsRepository;
+import h99.ecommerce.domain.product.ProductRepository;
+import h99.ecommerce.domain.product.ProductStatisticsRepository;
 import java.math.BigDecimal;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -141,25 +154,6 @@ public class ProductCacheIntegrationTest {
         System.out.println("재조회 후 재고: " + afterDeduction.getStock().getQuantity());
     }
 
-    @Test
-    @DisplayName("인기 상품 캐싱 테스트")
-    void popular_products_caching_test() {
-        // given
-        String cacheKey = "cache:product:popular:view:5";
-
-        // when: 1차 조회
-        var firstCall = productService.getPopularProductsByViewCount(5);
-        assertThat(cacheManager.getCache("popularProductsByView").get(cacheKey)).isNotNull();
-
-        // when: 2차 조회 (캐시 히트)
-        var secondCall = productService.getPopularProductsByViewCount(5);
-
-        // then: 캐시에서 반환
-        assertThat(secondCall).isNotNull();
-
-        System.out.println("=== 인기 상품 캐싱 테스트 결과 ===");
-        System.out.println("1차 조회 결과 수: " + firstCall.size());
-        System.out.println("2차 조회 결과 수: " + secondCall.size());
-        System.out.println("캐시 키: " + cacheKey);
-    }
+    // 인기 상품은 이제 Redis Sorted Set을 직접 사용하므로 Spring Cache 테스트 제거
+    // PopularProductIntegrationTest 참고
 }

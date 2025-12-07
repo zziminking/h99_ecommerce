@@ -1,15 +1,15 @@
 package h99.ecommerce.service;
 
-import h99.ecommerce.domain.CartItem;
-import h99.ecommerce.domain.Order;
-import h99.ecommerce.domain.OrderItem;
-import h99.ecommerce.domain.OrderStatus;
-import h99.ecommerce.domain.Product;
-import h99.ecommerce.domain.User;
+import h99.ecommerce.domain.cartitem.CartItem;
+import h99.ecommerce.domain.order.Order;
+import h99.ecommerce.domain.order.OrderItem;
+import h99.ecommerce.domain.order.OrderStatus;
+import h99.ecommerce.domain.product.Product;
+import h99.ecommerce.domain.user.User;
 import h99.ecommerce.exception.NotEnoughStockException;
-import h99.ecommerce.repository.CartItemRepository;
-import h99.ecommerce.repository.OrderRepository;
-import h99.ecommerce.repository.UserRepository;
+import h99.ecommerce.domain.cartitem.CartItemRepository;
+import h99.ecommerce.domain.order.OrderRepository;
+import h99.ecommerce.domain.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

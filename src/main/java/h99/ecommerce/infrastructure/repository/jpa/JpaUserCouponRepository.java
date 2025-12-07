@@ -1,7 +1,7 @@
 package h99.ecommerce.infrastructure.repository.jpa;
 
-import h99.ecommerce.domain.UserCoupon;
-import h99.ecommerce.repository.UserCouponRepository;
+import h99.ecommerce.domain.coupon.UserCoupon;
+import h99.ecommerce.domain.coupon.UserCouponRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import java.util.List;

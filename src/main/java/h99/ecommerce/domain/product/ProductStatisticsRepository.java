@@ -1,6 +1,6 @@
-package h99.ecommerce.repository;
+package h99.ecommerce.domain.product;
 
-import h99.ecommerce.domain.ProductStatistics;
+import h99.ecommerce.domain.product.ProductStatistics;
 
 import java.time.LocalDate;
 import java.util.List;
