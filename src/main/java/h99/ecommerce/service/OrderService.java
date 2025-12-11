@@ -6,12 +6,14 @@ import h99.ecommerce.domain.order.OrderItem;
 import h99.ecommerce.domain.order.OrderStatus;
 import h99.ecommerce.domain.product.Product;
 import h99.ecommerce.domain.user.User;
+import h99.ecommerce.event.OrderCompletedEvent;
 import h99.ecommerce.exception.NotEnoughStockException;
 import h99.ecommerce.domain.cartitem.CartItemRepository;
 import h99.ecommerce.domain.order.OrderRepository;
 import h99.ecommerce.domain.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -29,6 +31,7 @@ public class OrderService {
     private final ProductService productService;
     private final PaymentService paymentService;
     private final UserRepository userRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     /**
      * 장바구니 기반 주문 생성
@@ -82,16 +85,16 @@ public class OrderService {
             // 7. 장바구니 비우기
             clearCart(userId);
 
-            // TODO: 8. 주문 완료 이벤트 발행 (외부 시스템 연동)
+            // 8. 주문 완료 이벤트 발행 (트랜잭션 커밋 후 외부 시스템 연동)
+            eventPublisher.publishEvent(OrderCompletedEvent.from(order, userId));
+            log.info("주문 완료 이벤트 발행 - orderId: {}, userId: {}", order.getOrderId(), userId);
 
             return order;
 
         } catch (NotEnoughStockException | IllegalStateException e) {
-            // 재고 부족 또는 결제 실패 시 재고 복구
             restoreStock(order);
             throw e;
         } catch (Exception e) {
-            // 기타 예외 발생 시 재고 복구
             restoreStock(order);
             throw new RuntimeException("주문 처리 중 오류가 발생했습니다.", e);
         }
