@@ -19,14 +19,13 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class OrderEventProducer {
 
-    private final KafkaTemplate<String, OrderCompletedEvent> kafkaTemplate;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
 
     public void publishOrderCompleted(OrderCompletedEvent event) {
         String key = event.getOrderId().toString();
 
         try {
-            SendResult<String, OrderCompletedEvent> result =
-                kafkaTemplate.send(KafkaConfig.ORDER_COMPLETED_TOPIC, key, event)
+            kafkaTemplate.send(KafkaConfig.ORDER_COMPLETED_TOPIC, key, event)
                     .get(5, TimeUnit.SECONDS);
 
         } catch (Exception e) {
