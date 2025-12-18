@@ -1,14 +1,16 @@
 package h99.ecommerce.event;
 
+import h99.ecommerce.config.KafkaConfig;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Async;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.support.KafkaHeaders;
+import org.springframework.messaging.handler.annotation.Header;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.event.TransactionPhase;
-import org.springframework.transaction.event.TransactionalEventListener;
 
 /**
- * 주문 외부 시스템 동기화 리스너
+ * 주문 외부 시스템 동기화 리스너 (Kafka Consumer)
  * 주문 완료 시 외부 시스템과 동기화를 담당
  */
 @Slf4j
@@ -17,12 +19,20 @@ import org.springframework.transaction.event.TransactionalEventListener;
 public class OrderExternalSyncListener {
 
     /**
-     * 주문 완료 외부 시스템 동기화
+     * 주문 완료 외부 시스템 동기화 (Kafka Consumer)
      */
-    @Async("orderEventExecutor")
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    public void handleOrderCompleted(OrderCompletedEvent event) {
+    @KafkaListener(
+        topics = KafkaConfig.ORDER_COMPLETED_TOPIC,
+        groupId = "order-external-sync-group",
+        containerFactory = "kafkaListenerContainerFactory"
+    )
+    public void handleOrderCompleted(
+        @Payload OrderCompletedEvent event,
+        @Header(KafkaHeaders.RECEIVED_PARTITION) int partition,
+        @Header(KafkaHeaders.OFFSET) long offset
+    ) {
         try {
+            log.info("[외부 동기화] 주문 완료 이벤트 수신 - partition: {}, offset: {}", partition, offset);
             log.info("외부 시스템 동기화 시작 - orderId: {}, totalPrice: {}",
                 event.getOrderId(), event.getTotalPrice());
 
