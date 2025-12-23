@@ -2,6 +2,8 @@ package h99.ecommerce.controller;
 
 import h99.ecommerce.domain.coupon.Coupon;
 import h99.ecommerce.domain.coupon.UserCoupon;
+import h99.ecommerce.dto.CouponIssueResponse;
+import h99.ecommerce.dto.CouponStatusResponse;
 import h99.ecommerce.service.CouponService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -40,10 +42,10 @@ public class CouponController {
     }
 
     /**
-     * 쿠폰 발급
+     * 쿠폰 발급 (비동기)
      */
     @PostMapping("/{couponId}/issue")
-    public ResponseEntity<UserCoupon> issueCoupon(
+    public ResponseEntity<CouponIssueResponse> issueCoupon(
             @PathVariable Long couponId,
             @RequestParam Long userId
     ) {
@@ -54,8 +56,21 @@ public class CouponController {
             return ResponseEntity.badRequest().build();
         }
 
-        UserCoupon userCoupon = couponService.issueCoupon(userId, couponId);
-        return ResponseEntity.status(HttpStatus.CREATED).body(userCoupon);
+        CouponIssueResponse response = couponService.issueCoupon(userId, couponId);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
+    }
+
+    /**
+     * 쿠폰 발급 상태 조회
+     */
+    @GetMapping("/issue/status/{requestId}")
+    public ResponseEntity<CouponStatusResponse> getCouponIssueStatus(@PathVariable String requestId) {
+        if (requestId == null || requestId.isBlank()) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        CouponStatusResponse response = couponService.getCouponIssueStatus(requestId);
+        return ResponseEntity.ok(response);
     }
 
     /**

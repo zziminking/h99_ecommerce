@@ -85,8 +85,9 @@ public class OrderService {
             // 7. 장바구니 비우기
             clearCart(userId);
 
-            // 8. 주문 완료 이벤트 발행 (트랜잭션 커밋 후 외부 시스템 연동)
-            eventPublisher.publishEvent(OrderCompletedEvent.from(order, userId));
+            // 8. 주문 완료 이벤트 발행
+            OrderCompletedEvent orderCompletedEvent = OrderCompletedEvent.from(order, userId);
+            eventPublisher.publishEvent(orderCompletedEvent);
             log.info("주문 완료 이벤트 발행 - orderId: {}, userId: {}", order.getOrderId(), userId);
 
             return order;

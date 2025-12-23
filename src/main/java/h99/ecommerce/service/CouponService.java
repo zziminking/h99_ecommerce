@@ -1,5 +1,6 @@
 package h99.ecommerce.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import h99.ecommerce.annotation.CustomTransactional;
 import h99.ecommerce.annotation.DistributedLock;
 import h99.ecommerce.domain.coupon.Coupon;
@@ -8,17 +9,23 @@ import h99.ecommerce.domain.coupon.UserCoupon;
 import h99.ecommerce.domain.coupon.CouponRepository;
 import h99.ecommerce.domain.coupon.UserCouponRepository;
 import h99.ecommerce.domain.user.UserRepository;
+import h99.ecommerce.dto.CouponIssueResponse;
 import h99.ecommerce.dto.CouponIssueResult;
+import h99.ecommerce.dto.CouponStatusResponse;
 import h99.ecommerce.event.CouponIssuedEvent;
 import h99.ecommerce.exception.CouponIssueFailedException;
 import h99.ecommerce.repository.CouponRedisRepository;
 import java.util.Objects;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,49 +37,118 @@ public class CouponService {
     private final CouponRepository couponRepository;
     private final UserCouponRepository userCouponRepository;
     private final UserRepository userRepository;
-    private final CouponRedisRepository couponRedisRepository;  // ← 추가
-    private final ApplicationEventPublisher eventPublisher;     // ← 추가
+    private final CouponRedisRepository couponRedisRepository;
+    private final ApplicationEventPublisher eventPublisher;
+    private final RedisTemplate<String, String> redisTemplate;
+    private final ObjectMapper objectMapper;
 
     /**
-     * 쿠폰 발급 (선착순) - Redis 기반
-     * Lua Script를 이용한 원자적 처리
-     *
-     * @param userId 사용자 ID
-     * @param couponId 쿠폰 ID
-     * @return 발급된 사용자 쿠폰
-     * @throws CouponIssueFailedException 중복 발급, 쿠폰 소진 등
+     * 쿠폰 발급 (선착순) - Redis 기반 + Kafka 이벤트 발행
      */
-    public UserCoupon issueCoupon(Long userId, Long couponId) {
-        // 1. Redis Lua Script로 원자적 발급 처리
+    public CouponIssueResponse issueCoupon(Long userId, Long couponId) {
         CouponIssueResult result = couponRedisRepository.issueCouponAtomic(couponId, userId);
-        
+
         if (!result.isSuccess()) {
-            log.warn("쿠폰 발급 실패 - userId: {}, couponId: {}, error: {}", 
+            log.warn("쿠폰 발급 실패 - userId: {}, couponId: {}, error: {}",
                 userId, couponId, result.getErrorCode());
             throw new CouponIssueFailedException(result.getErrorMessage());
         }
-        
-        log.info("쿠폰 발급 성공 - userId: {}, couponId: {}, rank: {}, remainingStock: {}", 
+
+        log.info("쿠폰 발급 성공 - userId: {}, couponId: {}, rank: {}, remainingStock: {}",
             userId, couponId, result.getRank(), result.getRemainingStock());
-        
-        // 2. 이벤트 발행 (비동기 RDB 저장)
-        eventPublisher.publishEvent(new CouponIssuedEvent(
-            userId,
-            couponId,
-            result.getIssuedAt(),
-            result.getRank()
-        ));
-        
-        // 3. UserCoupon 객체 반환 (RDB 저장 전이지만 응답용)
+
+        String requestId = UUID.randomUUID().toString();
+
         Coupon coupon = couponRepository.findOne(couponId);
-        User user = userRepository.findOne(userId);
-        return UserCoupon.builder()
-            .user(user)
-            .coupon(coupon)
-            .isUsed(false)
+        if (coupon == null) {
+            throw new IllegalArgumentException("쿠폰을 찾을 수 없습니다. couponId: " + couponId);
+        }
+
+        CouponIssuedEvent event = CouponIssuedEvent.builder()
+            .requestId(requestId)
+            .userId(userId)
+            .couponId(couponId)
+            .issuedAt(result.getIssuedAt())
+            .rank(result.getRank())
+            .couponName(coupon.getName())
+            .discountType(coupon.getDiscountType().name())
+            .discountValue(coupon.getDiscountValue())
             .build();
+
+        eventPublisher.publishEvent(event);
+
+        try {
+            String statusKey = "coupon:issue:status:" + requestId;
+            Map<String, Object> status = Map.of(
+                "status", "PROCESSING",
+                "userId", userId,
+                "couponId", couponId,
+                "createdAt", System.currentTimeMillis()
+            );
+            redisTemplate.opsForValue().set(
+                statusKey,
+                objectMapper.writeValueAsString(status),
+                10, TimeUnit.MINUTES
+            );
+        } catch (Exception e) {
+            log.error("Redis 상태 저장 실패 - requestId: {}", requestId, e);
+        }
+
+        return CouponIssueResponse.accepted(requestId, result);
     }
-    
+
+    /**
+     * 쿠폰 발급 상태 조회
+     */
+    public CouponStatusResponse getCouponIssueStatus(String requestId) {
+        try {
+            String statusKey = "coupon:issue:status:" + requestId;
+            String statusData = redisTemplate.opsForValue().get(statusKey);
+
+            if (statusData == null) {
+                return CouponStatusResponse.notFound(requestId);
+            }
+
+            Map<String, Object> status = objectMapper.readValue(statusData, Map.class);
+            String statusValue = (String) status.get("status");
+            String message = (String) status.get("message");
+            Long userId = getLongValue(status, "userId");
+            Long couponId = getLongValue(status, "couponId");
+            Long createdAt = getLongValue(status, "createdAt");
+            Long updatedAt = getLongValue(status, "updatedAt");
+
+            if ("COMPLETED".equals(statusValue)) {
+                if (userId != null && couponId != null) {
+                    Optional<UserCoupon> userCoupon = userCouponRepository.findByUserIdAndCouponId(userId, couponId);
+                    if (userCoupon.isPresent()) {
+                        return CouponStatusResponse.completed(
+                            requestId, userId, couponId, userCoupon.get().getUserCouponId(), message
+                        );
+                    }
+                }
+                return CouponStatusResponse.completed(requestId, userId, couponId, null, message);
+            } else if ("FAILED".equals(statusValue)) {
+                return CouponStatusResponse.failed(requestId, message);
+            } else {
+                return CouponStatusResponse.processing(requestId, message);
+            }
+
+        } catch (Exception e) {
+            log.error("쿠폰 발급 상태 조회 실패 - requestId: {}", requestId, e);
+            return CouponStatusResponse.failed(requestId, "상태 조회 중 오류가 발생했습니다.");
+        }
+    }
+
+    private Long getLongValue(Map<String, Object> map, String key) {
+        Object value = map.get(key);
+        if (value instanceof Integer) {
+            return ((Integer) value).longValue();
+        } else if (value instanceof Long) {
+            return (Long) value;
+        }
+        return null;
+    }
+
     /**
      * 쿠폰 생성 (RDB + Redis 초기화)
      */
